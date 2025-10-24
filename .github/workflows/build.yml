@@ -1,4 +1,4 @@
-name: Build ztc Kernel
+name: Build esk Kernel
 
 env:
   TZ: Asia/Shanghai
@@ -88,8 +88,8 @@ jobs:
         id: ccache-restore
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ccache-ztc
-          restore-keys: ccache-ztc
+          key: ccache-esk
+          restore-keys: ccache-esk
       
       - name: 初始化并配置ccache
         run: |
