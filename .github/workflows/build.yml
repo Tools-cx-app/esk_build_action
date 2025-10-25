@@ -148,12 +148,15 @@ jobs:
         run: |
           cd kernel_workspace
           git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-${{ env.ANDROID_VERSION }}-${{ env.KERNEL_VERSION }}
+          git clone https://github.com/ShirkNeko/SukiSU_patch.git
           
           cp ./susfs4ksu/kernel_patches/50_add_susfs_in_gki-android12-5.10.patch ./common/
           cp ./susfs4ksu/kernel_patches/fs/* ./common/fs/
           cp ./susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/
+          cp ./SukiSU_patch/hooks/scope_min_manual_hooks_v1.5.patch ./common/
           
           cd ./common
+          patch -p1 < scope_min_manual_hooks_v1.5.patch || true
           patch -p1 --fuzz=3 < 50_add_susfs_in_gki-android12-5.10.patch || true
 
       - name: 添加Re:Kernel
