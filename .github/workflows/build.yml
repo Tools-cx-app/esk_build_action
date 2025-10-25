@@ -26,6 +26,14 @@ on:
         options:
           - 'true'
           - 'false'
+      schedhorizon_enable:
+        description: '是否移植schedhorizon调速器'
+        required: true
+        type: choice
+        default: 'true'
+        options: 
+          - 'true'
+          - 'false'
       rekernel_enable:
         description: '是否安装Rekernel'
         required: true
@@ -161,7 +169,7 @@ jobs:
 
       - name: 添加Re:Kernel
         run: |
-          if [[ "${{ github.event.inputs.rekernel_enable}}" == "1" ]]; then
+          if [[ "${{ github.event.inputs.rekernel_enable }}" == "1" ]]; then
             git clone https://github.com/Tools-cx-app/Re-Kernel-5-10.git -b main
             mv Re-Kernel-5-10/LKM-Source kernel_workspace/common/drivers/rekernel
             sed -i 's|#include <android/binder_internal.h>|#include "../../drivers/android/binder_internal.h"|' kernel_workspace/common/drivers/rekernel/rekernel.c
@@ -171,6 +179,16 @@ jobs:
             echo "CONFIG_REKERNEL_NETWORK=y" >> "kernel_workspace/common/arch/arm64/configs/gki_defconfig"
           fi
           
+      - name: 添加schedhorizon调速器
+        run: |
+          if [[ "${{ github.event.inputs.schedhorizon_enable }}" == "true" ]]; then
+            cd kernel_workspace
+            echo "下载相关文件"
+            curl -LSs https://raw.githubusercontent.com/Tools-cx-app/esk_build_action/main/patches/schedhorizon/cpufreq_schedhorizon.c -o common/kernel/sched/cpufreq_schedhorizon.c
+            #curl -LSs https://raw.githubusercontent.com/Tools-cx-app/esk_build_action/main/patches/schedhorizon/sched.h -o common/kernel/sched/sched.h
+            echo "写入补丁"
+            echo "obj-\$\(CONFIG_CPU_FREQ_GOV_SCHEDHORIZON\) += cpufreq_schedhorizon.o" >> common/kernel/sched/Makefile
+          fi
       - name: 添加 KSU & SUSFS 配置项
         run: |
           cd kernel_workspace
