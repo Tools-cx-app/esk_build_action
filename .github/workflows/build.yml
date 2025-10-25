@@ -26,6 +26,14 @@ on:
         options:
           - 'true'
           - 'false'
+      rekernel_enable:
+        description: '是否安装Rekernel'
+        required: true
+        type: choice
+        default: '1'
+        options:
+          - '0'
+          - '1'
       baseband_guard:
         description: '是否开启内核级基带保护(阻止一切对非用户分区的写入，有效防止格机)'
         required: true
@@ -151,6 +159,17 @@ jobs:
           patch -p1 < scope_min_manual_hooks_v1.5.patch || true
           patch -p1 --fuzz=3 < 50_add_susfs_in_gki-android12-5.10.patch || true
 
+      - name: 添加Re:Kernel
+        run: |
+          if [[ "${{ github.event.inputs.rekernel_enable}}" == "1" ]]; then
+            git clone https://github.com/Tools-cx-app/Re-Kernel-5-10.git -b main
+            mv Re-Kernel-5-10/LKM-Source kernel_workspace/common/drivers/rekernel
+            grep -q "rekernel" "kernel_workspace/common/drivers/Makefile" || printf "\nobj-\$(CONFIG_REKERNEL) += rekernel/\n" >> "kernel_workspace/common/drivers/Makefile" && echo "[+] Modified Makefile."
+            grep -q "source \"drivers/rekernel/Kconfig\"" "kernel_workspace/common/drivers/Kconfig" || sed -i "/endmenu/i\source \"drivers/rekernel/Kconfig\"" "kernel_workspace/common/drivers/Kconfig" && echo "[+] Modified Kconfig."
+            echo "CONFIG_REKERNEL=y" >> "kernel_workspace/common/arch/arm64/configs/gki_defconfig"
+            echo "CONFIG_REKERNEL_NETWORK=y" >> "kernel_workspace/common/arch/arm64/configs/gki_defconfig"
+          fi
+          
       - name: 添加 KSU & SUSFS 配置项
         run: |
           cd kernel_workspace
