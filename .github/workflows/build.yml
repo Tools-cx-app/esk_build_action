@@ -164,7 +164,7 @@ jobs:
           if [[ "${{ github.event.inputs.rekernel_enable}}" == "1" ]]; then
             git clone https://github.com/Tools-cx-app/Re-Kernel-5-10.git -b main
             mv Re-Kernel-5-10/LKM-Source kernel_workspace/common/drivers/rekernel
-            grep -q "rekernel" "kernel_workspace/common/drivers/Makefile" || printf "\nobj-\$(CONFIG_KSU) += rekernel/\n" >> "kernel_workspace/common/drivers/Makefile" && echo "[+] Modified Makefile."
+            grep -q "rekernel" "kernel_workspace/common/drivers/Makefile" || printf "\nobj-\$(CONFIG_REKERNEL) += rekernel/\n" >> "kernel_workspace/common/drivers/Makefile" && echo "[+] Modified Makefile."
             grep -q "source \"drivers/rekernel/Kconfig\"" "kernel_workspace/common/drivers/Kconfig" || sed -i "/endmenu/i\source \"drivers/rekernel/Kconfig\"" "kernel_workspace/common/drivers/Kconfig" && echo "[+] Modified Kconfig."
           fi
           
