@@ -198,24 +198,23 @@ jobs:
             echo "obj-\$\(CONFIG_CPU_FREQ_GOV_SCHEDHORIZON\) += cpufreq_schedhorizon.o" >> common/kernel/sched/Makefile
           fi
 
-
       - name: 添加lxc
         run: |
           if [[ "${{ github.event.inputs.better_net }}" == "true" ]]; then
             cd kernel_workspace/common
             echo "下载相关文件"
             curl -LSs https://raw.githubusercontent.com/Tools-cx-app/esk_build_action/main/patches/lxc/lxc_support.patch -o lxc.patch
-            echo "开始patch"
-            patch -p1 --forward --fuzz=3 < lxc.patch
-            #git clone https://github.com/tomxi1997/lxc-docker-support-for-android.git -b main
-            #mv lxc-docker-support-for-android common/LxcDocker
-            #echo 'source "utils/Kconfig"' >> common/Kconfig
-            #sh common/LxcDocker/runcpatch.sh common/kernel/cgroup/cgroup.c
-
-            #if [ -f common/net/netfilter/xt_qtaguid.c ]; then
-            #  patch -p0 < common/LxcDocker/xt_qtaguid.patch
-            #fi
+              echo "开始patch"
+            if [ -e "drivers/gpu/mediatek/mali-valhall/gpu/arm/midgard/context/mali_kbase_context.c" ]; then
+              patch -p1 --forward --fuzz=3 < lxc.patch
+            else
+              sed -i '/^diff --git.*mali_kbase_context\.c$/,/^diff --git/{
+                /^diff --git/!d
+              }'  lxc.patch
+              patch -p1 --forward --fuzz=3 < lxc.patch
+            fi
           fi
+          
       - name: 添加 KSU & SUSFS 配置项
         run: |
           cd kernel_workspace
