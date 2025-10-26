@@ -38,10 +38,10 @@ on:
         description: '是否安装Rekernel'
         required: true
         type: choice
-        default: '1'
+        default: 'true'
         options:
-          - '0'
-          - '1'
+          - 'true'
+          - 'true'
       baseband_guard:
         description: '是否开启内核级基带保护(阻止一切对非用户分区的写入，有效防止格机)'
         required: true
@@ -169,7 +169,7 @@ jobs:
 
       - name: 添加Re:Kernel
         run: |
-          if [[ "${{ github.event.inputs.rekernel_enable }}" == "1" ]]; then
+          if [[ "${{ github.event.inputs.rekernel_enable }}" == "true" ]]; then
             git clone https://github.com/Tools-cx-app/Re-Kernel-5-10.git -b main
             mv Re-Kernel-5-10/LKM-Source kernel_workspace/common/drivers/rekernel
             sed -i 's|#include <android/binder_internal.h>|#include "../../drivers/android/binder_internal.h"|' kernel_workspace/common/drivers/rekernel/rekernel.c
@@ -189,6 +189,7 @@ jobs:
             echo "写入补丁"
             echo "obj-\$\(CONFIG_CPU_FREQ_GOV_SCHEDHORIZON\) += cpufreq_schedhorizon.o" >> common/kernel/sched/Makefile
           fi
+
       - name: 添加 KSU & SUSFS 配置项
         run: |
           cd kernel_workspace
