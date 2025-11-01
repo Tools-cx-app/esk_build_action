@@ -464,10 +464,10 @@ jobs:
 
       - name: 上传 Ccache 调试日志
         if: always() && inputs.ccache_debug
-          uses: actions/upload-artifact@v4
-          with:
-            name: ccache-debug-log
-            path: ${{ github.workspace }}/kernel_workspace/ccache.log
+        uses: actions/upload-artifact@v4
+        with:
+          name: ccache-debug-log
+          path: ${{ github.workspace }}/kernel_workspace/ccache.log
 
       - name: 上传 ZIP 工件
         uses: actions/upload-artifact@v4
