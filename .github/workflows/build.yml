@@ -69,8 +69,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    outputs:
-      ksuver: ${{ steps.ksu_version.outputs.ksuver }}
     steps:
       - name: 安装配置环境依赖
         run: |
@@ -84,55 +82,34 @@ jobs:
             python-is-python3 bc libssl-dev libelf-dev \
             bc aria2 zip unzip ccache binutils-aarch64-linux-gnu
 
-      - name: 配置ccache目录
+      - name: 准备 ccache 目录变量
         run: |
-          echo "CCACHE_DIR=$HOME/.ccache_${{ env.KERNEL_VERSION }}" >> $GITHUB_ENV
-          echo "CCACHE_MAXSIZE=3G" >> $GITHUB_ENV
-          echo "当前磁盘空间："
-          df -h
-          echo "当前构建内核版本：${{ env.KERNEL_VERSION }}"
-          rm -rf kernel_workspace
-          mkdir kernel_workspace
+          CCACHE_DIR="$HOME/.ccache_${{ env.KERNEL_VERSION }}"
+          mkdir -p "$CCACHE_DIR"
+          echo "CCACHE_DIR=$CCACHE_DIR" >> $GITHUB_ENV
+          echo "CCACHE_BASEDIR=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
 
       - name: 载入当前版本内核的 ccache缓存
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: ccache-restore
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ccache-esk-${{ env.KERNEL_VERSION }}
-          restore-keys: 
-              ccache-esk-${{ env.KERNEL_VERSION }}
-      
-      - name: 初始化并配置ccache
+          restore-keys: |
+            ccache-esk-${{ env.KERNEL_VERSION }}-
+            ccache-esk-
+
+      - name: 初始化并配置 ccache
         run: |
-          # 设置ccache环境变量
-          export CCACHE_COMPILERCHECK="none"
-          export CCACHE_BASEDIR="${{ github.workspace }}"
-          export CCACHE_NOHASHDIR="true"
-          export CCACHE_HARDLINK="true"
-          export CCACHE_DIR="${{ env.CCACHE_DIR }}"
-          export CCACHE_MAXSIZE="${{ env.CCACHE_MAXSIZE }}"
-          
-          # 确保ccache目录存在
-          mkdir -p "$CCACHE_DIR"
-          
-          # 每次运行都重新配置缓存大小
-          echo "配置ccache缓存大小为: $CCACHE_MAXSIZE"
-          ccache -M "$CCACHE_MAXSIZE"
-          ccache -o compression=true
-          
-          # 显示初始缓存状态
-          echo "ccache初始状态:"
+          ccache --set-config=cache_dir=${{ env.CCACHE_DIR }}
+          ccache --set-config=max_size=5G
+          ccache --set-config=sloppiness=time_macros,include_file_ctime,include_file_mtime,file_stat_matches
+          ccache --set-config=hash_dir=false
           ccache -s
-          
-          # 如果缓存恢复命中，显示详细信息
-          if [ "${{ steps.ccache-restore.outputs.cache-hit }}" == 'true' ]; then
-            echo "ccache缓存命中详情:"
-            ccache -sv
-          fi
-      
+
       - name: 初始化源码仓库及llvm-Clang20工具链
         run: |
+          mkdir -p kernel_workspace
           cd kernel_workspace
           echo "正在克隆源码仓库..."
           aria2c -s16 -x16 -k1M https://github.com/ESK-Project/android12-5.10-gki/archive/refs/heads/main.zip -o common.zip && 
