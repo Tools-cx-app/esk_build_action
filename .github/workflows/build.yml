@@ -181,7 +181,7 @@ jobs:
           patch -p1 --fuzz=3 < 50_add_susfs_in_gki-android12-5.10.patch || true
           
           curl -LSs https://raw.githubusercontent.com/Tools-cx-app/gki_build_action/main/patches/lxc/fix_reboot_no_hanlder.patch -o fix_reboot_no_hanlder.patch
-          patch -p1 < fix_reboot_no_hanlder.patch
+          patch -p1 --fuzz=3 < fix_reboot_no_hanlder.patch
           rm fix_reboot_no_hanlder.patch
 
       - name: 添加Re:Kernel
