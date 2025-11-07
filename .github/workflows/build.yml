@@ -18,6 +18,14 @@ on:
           - 'false'
           - 'true'
           - 'default'
+      kernel:
+        description: "内核源码分支"
+        required: true
+        type: choice
+        default: 'esk'
+        options:
+          - 'ztc'
+          - 'esk'
       better_net:
         description: '是否开启网络功能增强优化配置(优化代理连接,IPV6等功能)'
         required: true
@@ -112,10 +120,17 @@ jobs:
           mkdir -p kernel_workspace
           cd kernel_workspace
           echo "正在克隆源码仓库..."
-          aria2c -s16 -x16 -k1M https://github.com/ESK-Project/android12-5.10-gki/archive/refs/heads/main.zip -o common.zip && 
-          unzip -q common.zip && 
-          mv "android12-5.10-gki-main" common &&
-          rm -rf common.zip &
+          if [[ "${{ github.event.inputs.kernel }}" == "esk" ]]; then
+            aria2c -s16 -x16 -k1M https://github.com/ESK-Project/android12-5.10-gki/archive/refs/heads/main.zip -o common.zip && 
+            unzip -q common.zip && 
+            mv "android12-5.10-gki-main" common &&
+            rm -rf common.zip &
+          else if [[ "${{ github.event.inputs.kernel }}" == "ztc" ]]; then
+            aria2c -s16 -x16 -k1M https://github.com/ztc1997/android_gki_kernel_5.10_common/archive/refs/heads/android12-5.10-2025-06.zip -o common.zip && 
+            unzip -q common.zip && 
+            mv "android_gki_kernel_5.10_common-android12-5.10-2025-06" common &&
+            rm -rf common.zip &
+          fi
           
           echo "正在克隆llvm-Clang20工具链..." &&
           mkdir -p clang20 &&
@@ -136,10 +151,12 @@ jobs:
             sed -i 's/ -dirty//g' "$f"
             sed -i '$i res=$(echo "$res" | sed '\''s/-dirty//g'\'')' "$f"
           done
-          echo "正在修复stock config"
-          cd common/
-          curl -LSs https://raw.githubusercontent.com/Tools-cx-app/esk_build_action/main/patches/fix_esk_config.patch -o fix_esk_config.patch
-          patch -p1 < fix_esk_config.patch
+          if [[ "${{ github.event.inputs.kernel }}" == "esk" ]]; then
+            echo "正在修复stock config"
+            cd common/
+            curl -LSs https://raw.githubusercontent.com/Tools-cx-app/gki_build_action/main/patches/fix_esk_config.patch -o fix_esk_config.patch
+            patch -p1 < fix_esk_config.patch
+          fi
 
       - name: 添加KernelSU
         id: ksu_version
@@ -180,8 +197,8 @@ jobs:
           if [[ "${{ github.event.inputs.schedhorizon_enable }}" == "true" ]]; then
             cd kernel_workspace
             echo "下载相关文件"
-            curl -LSs https://raw.githubusercontent.com/Tools-cx-app/esk_build_action/main/patches/schedhorizon/cpufreq_schedhorizon.c -o common/kernel/sched/cpufreq_schedhorizon.c
-            #curl -LSs https://raw.githubusercontent.com/Tools-cx-app/esk_build_action/main/patches/schedhorizon/sched.h -o common/kernel/sched/sched.h
+            curl -LSs https://raw.githubusercontent.com/Tools-cx-app/gki_build_action/main/patches/schedhorizon/cpufreq_schedhorizon.c -o common/kernel/sched/cpufreq_schedhorizon.c
+            #curl -LSs https://raw.githubusercontent.com/Tools-cx-app/gki_build_action/main/patches/schedhorizon/sched.h -o common/kernel/sched/sched.h
             echo "写入补丁"
             echo "obj-\$\(CONFIG_CPU_FREQ_GOV_SCHEDHORIZON\) += cpufreq_schedhorizon.o" >> common/kernel/sched/Makefile
           fi
@@ -191,7 +208,7 @@ jobs:
           if [[ "${{ github.event.inputs.lxc_enable }}" == "true" ]]; then
             cd kernel_workspace/common
             echo "下载相关文件"
-            curl -LSs https://raw.githubusercontent.com/Tools-cx-app/esk_build_action/main/patches/lxc/lxc_support.patch -o lxc.patch
+            curl -LSs https://raw.githubusercontent.com/Tools-cx-app/gki_build_action/main/patches/lxc/lxc_support.patch -o lxc.patch
               echo "开始patch"
             if [ -e "drivers/gpu/mediatek/mali-valhall/gpu/arm/midgard/context/mali_kbase_context.c" ]; then
               patch -p1 --forward --fuzz=3 < lxc.patch
