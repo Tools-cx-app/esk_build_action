@@ -460,6 +460,23 @@ jobs:
             zip -r ../AnyKernel3_${KSU_TYPENAME}_${{ env.KSUVER }}_${{ env.KERNEL_VERSION }}_A12_${{ env.KERNEL_NAME }}.zip ./*
           fi
 
+      - name: 上传到 Telegram
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+          BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
+          REKERNEL: ${{ github.event.inputs.rekernel_enable }}
+          LXC: ${{ github.event.inputs.lxc_enable }}
+          BBG: ${{ github.event.inputs.baseband_guard }}
+          BETTER_NET: ${{ github.event.inputs.better_net }}
+          SCHEDHORIZON: ${{ github.event.inputs.schedhorizon_enable }}
+        run: |
+          if [ -z ${{ secrets.BOT_TOKEN }}]; then
+            cd ${{ github.workspace }}
+            pip3 install telethon
+            python3 .github/bot.py
+          fi
+
       - name: 上传 Ccache 调试日志
         if: always() && inputs.ccache_debug
         uses: actions/upload-artifact@v4

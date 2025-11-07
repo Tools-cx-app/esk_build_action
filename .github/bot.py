@@ -1,0 +1,56 @@
+from telethon import TelegramClient
+import asyncio
+from telethon.sessions import StringSession
+from telethon.tl.types import InputReplyToMessage
+import os
+
+API_ID = 611335
+API_HASH = "d524b414d21f4d37f08684c1df41ac9c"
+
+SCHEDHORIZON = os.environ.get("SCHEDHORIZON")
+BETTER_NET = os.environ.get("BETTER_NET")
+REKERNEL = os.environ.get("REKERNEL")
+BBG = os.environ.get("BBG")
+LXC = os.environ.get("LXC")
+
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+CHAT_ID = int(os.environ.get("CHAT_ID"))
+BOT_CI_SESSION = os.environ.get("BOT_CI_SESSION")
+MSG_TEMPLATE = """
+```
+schedhorizon: {schedhorizon}
+rekernel: {rekernel}
+lxc: {lxc}
+BBG: {bbg}
+better_net: {better_net}
+```
+""".strip()
+
+
+def get_caption():
+    msg = MSG_TEMPLATE.format(
+        schedhorizon=SCHEDHORIZON,
+        rekernel=REKERNEL,
+        lxc=LXC,
+        bbg=BBG,
+        better_net=BETTER_NET,
+    )
+
+async def send_telegram_message():
+    async with TelegramClient(StringSession(BOT_CI_SESSION), api_id=API_ID, api_hash=API_HASH) as client:
+        await client.start(bot_token=BOT_TOKEN)
+        print("[+] Caption: ")
+        print("---")
+        print("---")
+        print("[+] Sending")
+        await client.send_file(
+            entity=CHAT_ID,
+            file=["./kernel_workspace/AnyKernel3_RKSU__5.10_A12_localhost-Hutao.zip"],
+            parse_mode="markdown",
+            caption=get_caption(),
+            message_thread_id=29147
+        )
+
+if __name__ == '__main__':
+    asyncio.run(send_telegram_message())
+
