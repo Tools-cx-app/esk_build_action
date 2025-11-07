@@ -1,4 +1,4 @@
-name: Build esk Kernel
+name: Build Kernel
 
 env:
   TZ: Asia/Shanghai
