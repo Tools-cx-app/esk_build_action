@@ -125,7 +125,7 @@ jobs:
             unzip -q common.zip && 
             mv "android12-5.10-gki-main" common &&
             rm -rf common.zip &
-          else if [[ "${{ github.event.inputs.kernel }}" == "ztc" ]]; then
+          elif [[ "${{ github.event.inputs.kernel }}" == "ztc" ]]; then
             aria2c -s16 -x16 -k1M https://github.com/ztc1997/android_gki_kernel_5.10_common/archive/refs/heads/android12-5.10-2025-06.zip -o common.zip && 
             unzip -q common.zip && 
             mv "android_gki_kernel_5.10_common-android12-5.10-2025-06" common &&
