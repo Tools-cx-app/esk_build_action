@@ -27,13 +27,12 @@ on:
           - 'ztc'
           - 'esk'
       hook_method:
-        description: 'hook模式(大部分情况manual即可，少数需切换sus su模式的场景才需要kprobes钩子, 若新版manual钩子出现问题可尝试syscall)'
+        description: 'hook模式(大部分情况manual即可
         required: true
         type: choice
         default: 'manual'
         options:
           - 'manual'
-          - 'kprobes'
           - 'syscall'
       better_net:
         description: '是否开启网络功能增强优化配置(优化代理连接,IPV6等功能)'
@@ -85,11 +84,6 @@ on:
         required: true
         type: boolean
         default: 'false'
-      kernel_suffix:
-        description: '内核后缀(留空默认,开头别加连字符,勿加空格等影响指令运行的保留字符)'
-        required: false
-        type: string
-        default: ''
 
 jobs:
   build:
@@ -382,17 +376,10 @@ jobs:
         run: |
           cd kernel_workspace
           echo "替换内核版本后缀..."
-          if [[ -n "${{ github.event.inputs.kernel_suffix }}" ]]; then
-            echo "当前内核版本后缀：${{ github.event.inputs.kernel_suffix }}"
-            for f in ./common/scripts/setlocalversion; do
-              sed -i "\$s|echo \"\\\$res\"|echo \"-${{ github.event.inputs.kernel_suffix }}\"|" "$f"
-            done
-          else
-            echo "当前内核版本后缀：${{ env.KERNEL_NAME }}"
-            for f in ./common/scripts/setlocalversion; do
-              sed -i "\$s|echo \"\\\$res\"|echo \"-${{ env.KERNEL_NAME }}\"|" "$f"
-            done
-          fi
+          echo "当前内核版本后缀：${{ env.KERNEL_NAME }}"
+          for f in ./common/scripts/setlocalversion; do
+            sed -i "\$s|echo \"\\\$res\"|echo \"-${{ env.KERNEL_NAME }}\"|" "$f"
+          done
            
       - name: 构建内核
         run: |
@@ -491,11 +478,7 @@ jobs:
             exit 1
           fi
           KSU_TYPENAME="RKSU"
-          if [[ -n "${{ github.event.inputs.kernel_suffix }}" ]]; then
-            zip -r ../AnyKernel3_${KSU_TYPENAME}_${{ env.KSUVER }}_${{ env.KERNEL_VERSION }}_A12_${{ github.event.inputs.kernel_suffix }}.zip ./*
-          else
-            zip -r ../AnyKernel3_${KSU_TYPENAME}_${{ env.KSUVER }}_${{ env.KERNEL_VERSION }}_A12_${{ env.KERNEL_NAME }}.zip ./*
-          fi
+          zip -r ../AnyKernel3_${KSU_TYPENAME}_${{ env.KSUVER }}_${{ env.KERNEL_VERSION }}_A12_${{ env.KERNEL_NAME }}.zip ./*
 
       - name: 上传到 Telegram
         env:
