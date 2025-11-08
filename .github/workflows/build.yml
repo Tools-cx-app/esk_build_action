@@ -211,7 +211,7 @@ jobs:
         run: |
           if [[ "${{ github.event.inputs.zram }}" == "true" ]]; then
             cd kernel_workspace
-            cp -r ./SukiSU_patch/other/zram/lz4k/include/linux/* ./common\include/linux/
+            cp -r ./SukiSU_patch/other/zram/lz4k/include/linux/* ./common/include/linux/
             cp -r ./SukiSU_patch/other/zram/lz4k/lib/* ./common/lib/
             cp -r ./SukiSU_patch/other/zram/lz4k/crypto/* ./common/crypto/
             cp -r ./SukiSU_patch/other/zram/lz4k_oplus ./common/lib/
