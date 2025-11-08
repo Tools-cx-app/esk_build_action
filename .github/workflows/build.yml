@@ -171,7 +171,11 @@ jobs:
         run: |
           # 进入内核工作目录
           cd kernel_workspace
-          curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s susfs-main
+          if [[ "${{ github.event.inputs.susfs }}" == "true" ]]; then
+            curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s susfs-main
+          else
+            curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
+          fi
 
       - name: 应用 KernelSU & SUSFS 补丁
         run: |
