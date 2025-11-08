@@ -38,6 +38,7 @@ def get_caption():
         susfs=SUSFS,
         hooks=HOOKS,
     )
+    return msg
 
 async def send_telegram_message():
     async with TelegramClient(StringSession(BOT_CI_SESSION), api_id=API_ID, api_hash=API_HASH) as client:
@@ -51,7 +52,7 @@ async def send_telegram_message():
             file=["./kernel_workspace/AnyKernel3_RKSU__5.10_A12_localhost-Hutao.zip"],
             parse_mode="markdown",
             caption=get_caption(),
-            message_thread_id=29147
+            reply_to=29147
         )
 
 if __name__ == '__main__':
