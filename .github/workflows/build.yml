@@ -176,11 +176,9 @@ jobs:
       - name: 应用 KernelSU & SUSFS 补丁
         run: |
           cd kernel_workspace
-          #git clone https://github.com/ShirkNeko/SukiSU_patch.git
-          curl -LSs https://raw.githubusercontent.com/Tools-cx-app/gki_build_action/main/patches/hooks/scope_min_manual_hooks_v1.5.patch -o scope_min_manual_hooks_v1.5.patch
+          git clone https://github.com/ShirkNeko/SukiSU_patch.git
           
-          #cp ./SukiSU_patch/hooks/scope_min_manual_hooks_v1.6.patch ./common/
-          cp ./scope_min_manual_hooks_v1.5.patch ./common/
+          cp ./SukiSU_patch/hooks/scope_min_manual_hooks_v1.6.patch ./common/
           if [[ "${{ github.event.inputs.susfs }}" == "true" ]]; then
             git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-${{ env.ANDROID_VERSION }}-${{ env.KERNEL_VERSION }}
             cp ./susfs4ksu/kernel_patches/50_add_susfs_in_gki-android12-5.10.patch ./common/
@@ -189,8 +187,7 @@ jobs:
           fi
           
           cd ./common
-          #patch -p1 < scope_min_manual_hooks_v1.6.patch || true
-          patch -p1 < scope_min_manual_hooks_v1.5.patch || true
+          patch -p1 < scope_min_manual_hooks_v1.6.patch || true
           if [[ "${{ github.event.inputs.susfs }}" == "true" ]]; then
             patch -p1 --fuzz=3 < 50_add_susfs_in_gki-android12-5.10.patch || true
           fi
