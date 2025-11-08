@@ -19,7 +19,6 @@ CHAT_ID = int(os.environ.get("CHAT_ID"))
 BOT_CI_SESSION = os.environ.get("BOT_CI_SESSION")
 MSG_TEMPLATE = """
 ```
-schedhorizon: {schedhorizon}
 rekernel: {rekernel}
 lxc: {lxc}
 BBG: {bbg}
@@ -32,7 +31,6 @@ hooks: {hooks}
 
 def get_caption():
     msg = MSG_TEMPLATE.format(
-        schedhorizon=SCHEDHORIZON,
         rekernel=REKERNEL,
         lxc=LXC,
         bbg=BBG,
