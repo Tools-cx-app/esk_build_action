@@ -26,6 +26,15 @@ on:
         options:
           - 'ztc'
           - 'esk'
+      hook_method:
+        description: 'hook模式(大部分情况manual即可，少数需切换sus su模式的场景才需要kprobes钩子, 若新版manual钩子出现问题可尝试syscall)'
+        required: true
+        type: choice
+        default: 'manual'
+        options:
+          - 'manual'
+          - 'kprobes'
+          - 'syscall'
       better_net:
         description: '是否开启网络功能增强优化配置(优化代理连接,IPV6等功能)'
         required: true
@@ -182,7 +191,12 @@ jobs:
           cd kernel_workspace
           git clone https://github.com/ShirkNeko/SukiSU_patch.git
           
-          cp ./SukiSU_patch/hooks/scope_min_manual_hooks_v1.6.patch ./common/
+          if [[ ${{ github.event.inputs.hook_method }} == "manual" ]]; then
+            cp ./SukiSU_patch/hooks/scope_min_manual_hooks_v1.6.patch ./common/
+          elif [[ ${{ github.event.inputs.hook_method }} == "syscall" ]]; then
+            cp ./SukiSU_patch/hooks/syscall_hooks.patch ./common/
+          fi
+          
           if [[ "${{ github.event.inputs.susfs }}" == "true" ]]; then
             git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-${{ env.ANDROID_VERSION }}-${{ env.KERNEL_VERSION }}
             cp ./susfs4ksu/kernel_patches/50_add_susfs_in_gki-android12-5.10.patch ./common/
@@ -191,7 +205,12 @@ jobs:
           fi
           
           cd ./common
-          patch -p1 < scope_min_manual_hooks_v1.6.patch || true
+          if [[ ${{ github.event.inputs.hook_method }} == "manual" ]]; then
+            patch -p1 < scope_min_manual_hooks_v1.6.patch || true
+          elif [[ ${{ github.event.inputs.hook_method }} == "syscall" ]]; then
+            patch -p1 < syscall_hooks.patch || true
+          fi
+          
           if [[ "${{ github.event.inputs.susfs }}" == "true" ]]; then
             patch -p1 --fuzz=3 < 50_add_susfs_in_gki-android12-5.10.patch || true
           fi
@@ -244,7 +263,7 @@ jobs:
         run: |
           cd kernel_workspace
           echo "CONFIG_KSU=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "正在开启manual钩子..."
+          echo "正在开启manual/syscall钩子..."
           echo "CONFIG_KSU_MANUAL_HOOK=y" >> ./common/arch/arm64/configs/gki_defconfig
           if [[ "${{ github.event.inputs.susfs }}" == "true" ]]; then
             echo "CONFIG_KSU_SUSFS_SUS_SU=n" >> ./common/arch/arm64/configs/gki_defconfig
@@ -489,6 +508,7 @@ jobs:
           BETTER_NET: ${{ github.event.inputs.better_net }}
           SCHEDHORIZON: ${{ github.event.inputs.schedhorizon_enable }}
           SUSFS: ${{ github.event.inputs.susfs }}
+          HOOKS: ${{ github.event.inputs.hook_method }}
         run: |
           if [ -z ${{ secrets.BOT_TOKEN }} ]; then
             exit 0
