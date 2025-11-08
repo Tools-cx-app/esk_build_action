@@ -188,6 +188,8 @@ jobs:
             cp ./susfs4ksu/kernel_patches/fs/* ./common/fs/
             cp ./susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/
           fi
+
+          cp ./SukiSU_patch/69_hide_stuff.patch ./common/
           
           cd ./common
           if [[ ${{ github.event.inputs.hook_method }} == "manual" ]]; then
@@ -202,6 +204,7 @@ jobs:
           
           curl -LSs https://raw.githubusercontent.com/Tools-cx-app/gki_build_action/main/patches/fix_reboot_no_hanlder.patch -o fix_reboot_no_hanlder.patch
           patch -p1 --fuzz=3 < fix_reboot_no_hanlder.patch
+          patch -p1 69_hide_stuff.patch || true
           rm fix_reboot_no_hanlder.patch
 
       - name: 添加lz4等zram压缩算法
