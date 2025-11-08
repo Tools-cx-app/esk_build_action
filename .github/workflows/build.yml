@@ -18,7 +18,7 @@ on:
           - 'ztc'
           - 'esk'
       hook_method:
-        description: 'hook模式(大部分情况manual即可
+        description: 'hook模式(大部分情况manual即可)'
         required: true
         type: choice
         default: 'manual'
