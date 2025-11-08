@@ -34,6 +34,14 @@ on:
         options:
           - 'true'
           - 'false'
+      susfs:
+        description: '是否开启susfs'
+        required: true
+        type: choice
+        default: 'true'
+        options:
+          - 'true'
+          - 'false'
       lxc_enable:
         description: '是否开启lxc'
         required: true
@@ -168,17 +176,21 @@ jobs:
       - name: 应用 KernelSU & SUSFS 补丁
         run: |
           cd kernel_workspace
-          git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-${{ env.ANDROID_VERSION }}-${{ env.KERNEL_VERSION }}
           git clone https://github.com/ShirkNeko/SukiSU_patch.git
           
-          cp ./susfs4ksu/kernel_patches/50_add_susfs_in_gki-android12-5.10.patch ./common/
-          cp ./susfs4ksu/kernel_patches/fs/* ./common/fs/
-          cp ./susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/
           cp ./SukiSU_patch/hooks/scope_min_manual_hooks_v1.6.patch ./common/
+          if [[ "${{ github.event.inputs.susfs }}" == "true" ]]; then
+            git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-${{ env.ANDROID_VERSION }}-${{ env.KERNEL_VERSION }}
+            cp ./susfs4ksu/kernel_patches/50_add_susfs_in_gki-android12-5.10.patch ./common/
+            cp ./susfs4ksu/kernel_patches/fs/* ./common/fs/
+            cp ./susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/
+          fi
           
           cd ./common
           patch -p1 < scope_min_manual_hooks_v1.6.patch || true
-          patch -p1 --fuzz=3 < 50_add_susfs_in_gki-android12-5.10.patch || true
+          if [[ "${{ github.event.inputs.susfs }}" == "true" ]]; then
+            patch -p1 --fuzz=3 < 50_add_susfs_in_gki-android12-5.10.patch || true
+          fi
           
           curl -LSs https://raw.githubusercontent.com/Tools-cx-app/gki_build_action/main/patches/lxc/fix_reboot_no_hanlder.patch -o fix_reboot_no_hanlder.patch
           patch -p1 --fuzz=3 < fix_reboot_no_hanlder.patch
@@ -230,21 +242,23 @@ jobs:
           echo "CONFIG_KSU=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "正在开启manual钩子..."
           echo "CONFIG_KSU_MANUAL_HOOK=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KSU_SUSFS_SUS_SU=n" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KSU_SUSFS=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KSU_SUSFS_HAS_MAGIC_MOUNT=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KSU_SUSFS_SUS_PATH=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KSU_SUSFS_SUS_MOUNT=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KSU_SUSFS_AUTO_ADD_SUS_KSU_DEFAULT_MOUNT=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KSU_SUSFS_AUTO_ADD_SUS_BIND_MOUNT=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KSU_SUSFS_SUS_KSTAT=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KSU_SUSFS_TRY_UMOUNT=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KSU_SUSFS_AUTO_ADD_TRY_UMOUNT_FOR_BIND_MOUNT=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KSU_SUSFS_SPOOF_UNAME=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KSU_SUSFS_ENABLE_LOG=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KSU_SUSFS_OPEN_REDIRECT=y" >> ./common/arch/arm64/configs/gki_defconfig
+          if [[ "${{ github.event.inputs.susfs }}" == "true" ]]; then
+            echo "CONFIG_KSU_SUSFS_SUS_SU=n" >> ./common/arch/arm64/configs/gki_defconfig
+            echo "CONFIG_KSU_SUSFS=y" >> ./common/arch/arm64/configs/gki_defconfig
+            echo "CONFIG_KSU_SUSFS_HAS_MAGIC_MOUNT=y" >> ./common/arch/arm64/configs/gki_defconfig
+            echo "CONFIG_KSU_SUSFS_SUS_PATH=y" >> ./common/arch/arm64/configs/gki_defconfig
+            echo "CONFIG_KSU_SUSFS_SUS_MOUNT=y" >> ./common/arch/arm64/configs/gki_defconfig
+            echo "CONFIG_KSU_SUSFS_AUTO_ADD_SUS_KSU_DEFAULT_MOUNT=y" >> ./common/arch/arm64/configs/gki_defconfig
+            echo "CONFIG_KSU_SUSFS_AUTO_ADD_SUS_BIND_MOUNT=y" >> ./common/arch/arm64/configs/gki_defconfig
+            echo "CONFIG_KSU_SUSFS_SUS_KSTAT=y" >> ./common/arch/arm64/configs/gki_defconfig
+            echo "CONFIG_KSU_SUSFS_TRY_UMOUNT=y" >> ./common/arch/arm64/configs/gki_defconfig
+            echo "CONFIG_KSU_SUSFS_AUTO_ADD_TRY_UMOUNT_FOR_BIND_MOUNT=y" >> ./common/arch/arm64/configs/gki_defconfig
+            echo "CONFIG_KSU_SUSFS_SPOOF_UNAME=y" >> ./common/arch/arm64/configs/gki_defconfig
+            echo "CONFIG_KSU_SUSFS_ENABLE_LOG=y" >> ./common/arch/arm64/configs/gki_defconfig
+            echo "CONFIG_KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS=y" >> ./common/arch/arm64/configs/gki_defconfig
+            echo "CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG=y" >> ./common/arch/arm64/configs/gki_defconfig
+            echo "CONFIG_KSU_SUSFS_OPEN_REDIRECT=y" >> ./common/arch/arm64/configs/gki_defconfig
+          fi
           #添加对 Mountify (backslashxx/mountify) 模块的支持
           echo "CONFIG_TMPFS_XATTR=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_TMPFS_POSIX_ACL=y" >> ./common/arch/arm64/configs/gki_defconfig
@@ -470,6 +484,7 @@ jobs:
           BBG: ${{ github.event.inputs.baseband_guard }}
           BETTER_NET: ${{ github.event.inputs.better_net }}
           SCHEDHORIZON: ${{ github.event.inputs.schedhorizon_enable }}
+          SUSFS: ${{ github.event.inputs.susfs }}
         run: |
           if [ -z ${{ secrets.BOT_TOKEN }}]; then
             cd ${{ github.workspace }}

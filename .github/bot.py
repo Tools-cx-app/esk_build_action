@@ -12,6 +12,7 @@ BETTER_NET = os.environ.get("BETTER_NET")
 REKERNEL = os.environ.get("REKERNEL")
 BBG = os.environ.get("BBG")
 LXC = os.environ.get("LXC")
+SUSFS = os.environ.get("SUSFS")
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 CHAT_ID = int(os.environ.get("CHAT_ID"))
@@ -23,6 +24,7 @@ rekernel: {rekernel}
 lxc: {lxc}
 BBG: {bbg}
 better_net: {better_net}
+susfs: {susfs}
 ```
 """.strip()
 
@@ -34,6 +36,7 @@ def get_caption():
         lxc=LXC,
         bbg=BBG,
         better_net=BETTER_NET,
+        susfs=SUSFS
     )
 
 async def send_telegram_message():
