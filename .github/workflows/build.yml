@@ -33,6 +33,14 @@ on:
         options:
           - 'true'
           - 'false'
+      zram:
+        description: '是否开启lz4等zram压缩算法'
+        required: true
+        type: choice
+        default: 'true'
+        options:
+          - 'true'
+          - 'false'
       susfs:
         description: '是否开启susfs'
         required: true
@@ -195,6 +203,25 @@ jobs:
           curl -LSs https://raw.githubusercontent.com/Tools-cx-app/gki_build_action/main/patches/fix_reboot_no_hanlder.patch -o fix_reboot_no_hanlder.patch
           patch -p1 --fuzz=3 < fix_reboot_no_hanlder.patch
           rm fix_reboot_no_hanlder.patch
+
+      - name: 添加lz4等zram压缩算法
+        run: |
+          if [[ "${{ github.event.inputs.zram }}" == "true" ]]; then
+            cd kernel_workspace
+            cp -r ./SukiSU_patch/other/zram/lz4k/include/linux/* ./common\include/linux/
+            cp -r ./SukiSU_patch/other/zram/lz4k/lib/* ./common/lib/
+            cp -r ./SukiSU_patch/other/zram/lz4k/crypto/* ./common/crypto/
+            cp -r ./SukiSU_patch/other/zram/lz4k_oplus ./common/lib/
+
+            cp ./SukiSU_patch/other/zram/zram_patch/5.10/lz4kd.patch ./common
+            cp ./SukiSU_patch/other/zram/zram_patch/5.10/lz4k_oplus.patch ./common
+          
+            echo "正在打补丁"
+            cd common
+            patch -p1 -F 3 < lz4kd.patch || true
+            patch -p1 -F 3 < lz4k_oplus.patch || true
+            echo '完成补丁'
+          fi
 
       - name: 添加Re:Kernel
         run: |
@@ -424,6 +451,7 @@ jobs:
           BBG: ${{ github.event.inputs.baseband_guard }}
           BETTER_NET: ${{ github.event.inputs.better_net }}
           SUSFS: ${{ github.event.inputs.susfs }}
+          ZRAM: ${{ github.event.inputs.zram }}
           HOOKS: ${{ github.event.inputs.hook_method }}
         run: |
           if [ -z ${{ secrets.BOT_TOKEN }} ]; then

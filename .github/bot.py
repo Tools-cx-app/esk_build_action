@@ -14,6 +14,7 @@ LXC = os.environ.get("LXC")
 SUSFS = os.environ.get("SUSFS")
 HOOKS = os.environ.get("HOOKS")
 KERNEL = os.environ.get("KERNEL")
+ZRAM = os.environ.get("ZRAM")
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 CHAT_ID = int(os.environ.get("CHAT_ID"))
@@ -28,6 +29,7 @@ BBG: {bbg}
 better_net status: {better_net}
 susfs status: {susfs}
 hook type: {hooks}
+more ZRAM: {zram}
 ```
 [Workflow run]({run_url})
 """.strip()
@@ -42,6 +44,7 @@ def get_caption():
         better_net=BETTER_NET,
         susfs=SUSFS,
         hooks=HOOKS,
+        zram=ZRAM,
         run_url=RUN_URL,
     )
     return msg
