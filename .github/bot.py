@@ -22,12 +22,12 @@ BOT_CI_SESSION = os.environ.get("BOT_CI_SESSION")
 MSG_TEMPLATE = """
 ```
 kernel source: {kernel}
-rekernel: {rekernel}
-lxc: {lxc}
+rekernel status: {rekernel}
+lxc support status: {lxc}
 BBG: {bbg}
-better_net: {better_net}
-susfs: {susfs}
-hooks: {hooks}
+better_net status: {better_net}
+susfs status: {susfs}
+hook type: {hooks}
 ```
 [Workflow run]({run_url})
 """.strip()
