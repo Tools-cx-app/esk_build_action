@@ -16,6 +16,7 @@ HOOKS = os.environ.get("HOOKS")
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 CHAT_ID = int(os.environ.get("CHAT_ID"))
+RUN_URL = os.environ.get("RUN_URL")
 BOT_CI_SESSION = os.environ.get("BOT_CI_SESSION")
 MSG_TEMPLATE = """
 ```
@@ -25,6 +26,7 @@ BBG: {bbg}
 better_net: {better_net}
 susfs: {susfs}
 hooks: {hooks}
+[Workflow run]({run_url})
 ```
 """.strip()
 
@@ -37,6 +39,7 @@ def get_caption():
         better_net=BETTER_NET,
         susfs=SUSFS,
         hooks=HOOKS,
+        run_url=RUN_URL,
     )
     return msg
 
