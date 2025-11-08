@@ -13,6 +13,7 @@ BBG = os.environ.get("BBG")
 LXC = os.environ.get("LXC")
 SUSFS = os.environ.get("SUSFS")
 HOOKS = os.environ.get("HOOKS")
+KERNEL = os.environ.get("KERNEL")
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 CHAT_ID = int(os.environ.get("CHAT_ID"))
@@ -20,19 +21,21 @@ RUN_URL = os.environ.get("RUN_URL")
 BOT_CI_SESSION = os.environ.get("BOT_CI_SESSION")
 MSG_TEMPLATE = """
 ```
+kernel source: {kernel}
 rekernel: {rekernel}
 lxc: {lxc}
 BBG: {bbg}
 better_net: {better_net}
 susfs: {susfs}
 hooks: {hooks}
-[Workflow run]({run_url})
 ```
+[Workflow run]({run_url})
 """.strip()
 
 
 def get_caption():
     msg = MSG_TEMPLATE.format(
+        kernel=KERNEL,
         rekernel=REKERNEL,
         lxc=LXC,
         bbg=BBG,

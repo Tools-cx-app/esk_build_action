@@ -418,6 +418,7 @@ jobs:
           CHAT_ID: ${{ secrets.CHAT_ID }}
           BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          KERNEL: ${{ github.event.inputs.kernel }}
           REKERNEL: ${{ github.event.inputs.rekernel_enable }}
           LXC: ${{ github.event.inputs.lxc_enable }}
           BBG: ${{ github.event.inputs.baseband_guard }}
