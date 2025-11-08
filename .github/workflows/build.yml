@@ -58,14 +58,6 @@ on:
         options: 
           - 'true'
           - 'false'
-      schedhorizon_enable:
-        description: '是否移植schedhorizon调速器'
-        required: true
-        type: choice
-        default: 'true'
-        options: 
-          - 'true'
-          - 'false'
       rekernel_enable:
         description: '是否安装Rekernel'
         required: true
@@ -225,17 +217,6 @@ jobs:
             echo "CONFIG_REKERNEL_NETWORK=y" >> "kernel_workspace/common/arch/arm64/configs/gki_defconfig"
           fi
           
-      - name: 添加schedhorizon调速器
-        run: |
-          if [[ "${{ github.event.inputs.schedhorizon_enable }}" == "true" ]]; then
-            cd kernel_workspace
-            echo "下载相关文件"
-            curl -LSs https://raw.githubusercontent.com/Tools-cx-app/gki_build_action/main/patches/schedhorizon/cpufreq_schedhorizon.c -o common/kernel/sched/cpufreq_schedhorizon.c
-            #curl -LSs https://raw.githubusercontent.com/Tools-cx-app/gki_build_action/main/patches/schedhorizon/sched.h -o common/kernel/sched/sched.h
-            echo "写入补丁"
-            echo "obj-\$\(CONFIG_CPU_FREQ_GOV_SCHEDHORIZON\) += cpufreq_schedhorizon.o" >> common/kernel/sched/Makefile
-          fi
-
       - name: 添加lxc
         run: |
           if [[ "${{ github.event.inputs.lxc_enable }}" == "true" ]]; then
@@ -489,7 +470,6 @@ jobs:
           LXC: ${{ github.event.inputs.lxc_enable }}
           BBG: ${{ github.event.inputs.baseband_guard }}
           BETTER_NET: ${{ github.event.inputs.better_net }}
-          SCHEDHORIZON: ${{ github.event.inputs.schedhorizon_enable }}
           SUSFS: ${{ github.event.inputs.susfs }}
           HOOKS: ${{ github.event.inputs.hook_method }}
         run: |

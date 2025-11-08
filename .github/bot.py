@@ -7,7 +7,6 @@ import os
 API_ID = 611335
 API_HASH = "d524b414d21f4d37f08684c1df41ac9c"
 
-SCHEDHORIZON = os.environ.get("SCHEDHORIZON")
 BETTER_NET = os.environ.get("BETTER_NET")
 REKERNEL = os.environ.get("REKERNEL")
 BBG = os.environ.get("BBG")
