@@ -153,12 +153,6 @@ jobs:
             sed -i 's/ -dirty//g' "$f"
             sed -i '$i res=$(echo "$res" | sed '\''s/-dirty//g'\'')' "$f"
           done
-          if [[ "${{ github.event.inputs.kernel }}" == "esk" ]]; then
-            echo "正在修复stock config"
-            cd common/
-            curl -LSs https://raw.githubusercontent.com/Tools-cx-app/gki_build_action/main/patches/fix_esk_config.patch -o fix_esk_config.patch
-            patch -p1 < fix_esk_config.patch
-          fi
 
       - name: 添加KernelSU
         id: ksu_version
