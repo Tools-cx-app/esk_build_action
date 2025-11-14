@@ -15,6 +15,7 @@ SUSFS = os.environ.get("SUSFS")
 HOOKS = os.environ.get("HOOKS")
 KERNEL = os.environ.get("KERNEL")
 ZRAM = os.environ.get("ZRAM")
+STOCK_CONFIG = os.environ.get("STOCK_CONFIG")
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 CHAT_ID = int(os.environ.get("CHAT_ID"))
@@ -23,6 +24,7 @@ BOT_CI_SESSION = os.environ.get("BOT_CI_SESSION")
 MSG_TEMPLATE = """
 ```
 kernel source: {kernel}
+stock config: {stock_config}
 rekernel status: {rekernel}
 lxc support status: {lxc}
 BBG: {bbg}
@@ -38,6 +40,7 @@ more ZRAM: {zram}
 def get_caption():
     msg = MSG_TEMPLATE.format(
         kernel=KERNEL,
+        stock_config=STOCK_CONFIG,
         rekernel=REKERNEL,
         lxc=LXC,
         bbg=BBG,
