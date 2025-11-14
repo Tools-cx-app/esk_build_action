@@ -16,6 +16,7 @@ on:
         default: 'esk'
         options:
           - 'ztc'
+          - 'ztc(hutao)'
           - 'esk'
       hook_method:
         description: 'hook模式(大部分情况manual即可)'
@@ -127,6 +128,11 @@ jobs:
             aria2c -s16 -x16 -k1M https://github.com/ztc1997/android_gki_kernel_5.10_common/archive/refs/heads/android12-5.10-2025-06.zip -o common.zip && 
             unzip -q common.zip && 
             mv "android_gki_kernel_5.10_common-android12-5.10-2025-06" common &&
+            rm -rf common.zip &
+          elif [[ "${{ github.event.inputs.kernel }}" == "ztc(hutao)" ]]; then
+            aria2c -s16 -x16 -k1M https://github.com/Tools-cx-app/android_gki_kernel_5.10_common/archive/refs/heads/android12-5.10-2025-09.zip -o common.zip && 
+            unzip -q common.zip && 
+            mv "android_gki_kernel_5.10_common-android12-5.10-2025-09" common &&
             rm -rf common.zip &
           fi
           
