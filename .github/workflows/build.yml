@@ -41,38 +41,26 @@ on:
         options:
           - 'true'
           - 'false'
-      susfs:
-        description: '是否开启susfs'
-        required: true
-        type: choice
-        default: 'true'
-        options:
-          - 'true'
-          - 'false'
-      lxc_enable:
-        description: '是否开启lxc'
-        required: true
-        type: choice
-        default: 'false'
-        options: 
-          - 'true'
-          - 'false'
-      stock_config:
-        description: '是否开启stock config'
-        required: true
-        type: choice
-        default: 'true'
-        options:
-          - 'true'
-          - 'false'
       rekernel_enable:
         description: '是否安装Rekernel'
         required: true
-        type: choice
+        type: boolean
         default: 'true'
-        options:
-          - 'true'
-          - 'false'
+      susfs:
+        description: '是否开启susfs'
+        required: true
+        type: boolean
+        default: 'true'
+      lxc_enable:
+        description: '是否开启lxc'
+        required: true
+        type: boolean
+        default: 'false'
+      stock_config:
+        description: '是否开启stock config'
+        required: true
+        type: boolean
+        default: 'false'
       baseband_guard:
         description: '是否开启内核级基带保护(阻止一切对非用户分区的写入，有效防止格机)'
         required: true
