@@ -426,7 +426,7 @@ jobs:
             echo "未找到内核镜像文件，构建可能出错"
             exit 1
           fi
-          zip -r ../AnyKernel3_${{ env.KSUVER }}_${{ env.KERNEL_VERSION }}_A12_${{ env.KERNEL_NAME }}.zip ./*
+          zip -r ../AnyKernel3_${{ env.KERNEL_VERSION }}_A12_${{ env.KERNEL_NAME }}.zip ./*
 
       - name: 上传到 Telegram
         env:
