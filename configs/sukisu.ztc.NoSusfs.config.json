@@ -1,0 +1,13 @@
+{
+  "kernel": "ztc",
+  "kernelsu": "sukisu",
+  "hook_method": "manual",
+  "better_net": "true",
+  "zram": "true",
+  "rekernel_enable": "true",
+  "susfs": "false",
+  "lxc_enable": "false",
+  "stock_config": "false",
+  "baseband_guard": "true",
+  "out": "ak3-5.10_ztc_sukisu.zip"
+}
