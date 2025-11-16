@@ -9,5 +9,6 @@
   "lxc_enable": "false",
   "stock_config": "false",
   "baseband_guard": "true",
-  "debug": "false"
+  "debug": "false",
+  "out": "ak3-5.10_esk_rksu.zip"
 }

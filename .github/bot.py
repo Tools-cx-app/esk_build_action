@@ -56,7 +56,7 @@ def get_caption():
     )
     return msg
 
-async def send_telegram_message():
+async def send_telegram_message(file_path: str):
     async with TelegramClient(StringSession(BOT_CI_SESSION), api_id=API_ID, api_hash=API_HASH) as client:
         await client.start(bot_token=BOT_TOKEN)
         print("[+] Caption: ")
@@ -65,12 +65,20 @@ async def send_telegram_message():
         print("[+] Sending")
         await client.send_file(
             entity=CHAT_ID,
-            file=["./kernel_workspace/AnyKernel3_5.10_A12_localhost-Hutao.zip"],
+            file=file_path,
             parse_mode="markdown",
             caption=get_caption(),
             reply_to=29147
         )
 
 if __name__ == '__main__':
-    asyncio.run(send_telegram_message())
+    if len(sys.argv) < 2:
+        print("Usage: python send_kernel.py <file_to_upload>")
+        sys.exit(1)
 
+    file_to_upload = sys.argv[1]
+    if not os.path.isfile(file_to_upload):
+        print(f"Error: {file_to_upload} does not exist!")
+        sys.exit(1)
+
+    asyncio.run(send_telegram_message(file_to_upload))

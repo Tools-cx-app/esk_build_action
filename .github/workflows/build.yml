@@ -46,7 +46,8 @@ jobs:
       SUSFS: ${{ matrix.CONFIG.susfs }}
       ZRAM: ${{ matrix.CONFIG.zram }}
       HOOKS: ${{ matrix.CONFIG.hook_method }}
-      DEBUG:: ${{ matrix.CONFIG.debug }}
+      DEBUG: ${{ matrix.CONFIG.debug }}
+      OUT: ${{ matrix.CONFIG.out }}
     steps:
       - name: 安装配置环境依赖
         run: |
@@ -426,7 +427,7 @@ jobs:
             echo "未找到内核镜像文件，构建可能出错"
             exit 1
           fi
-          zip -r ../AnyKernel3_${{ env.KERNEL_VERSION }}_A12_${{ env.KERNEL_NAME }}.zip ./*
+          zip -r ../${{ env.OUT }} ./*
 
       - name: 上传到 Telegram
         env:
@@ -451,7 +452,7 @@ jobs:
           cd ${{ github.workspace }}
           pip3 install telethon
           curl -LSOs https://github.com/Tools-cx-app/gki_build_action/raw/main/.github/bot.py
-          python3 bot.py
+          python3 bot.py ./kernel_workspace/${{ env.OUT }}
 
       - name: 上传 Ccache 调试日志
         if: always() && env.DEBUG
@@ -464,4 +465,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Kernel_ZIP_Artifacts
-          path: ${{ github.workspace }}/kernel_workspace/AnyKernel*.zip
+          path: ${{ github.workspace }}/kernel_workspace/*.zip
