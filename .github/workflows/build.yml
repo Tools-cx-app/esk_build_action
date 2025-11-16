@@ -46,6 +46,7 @@ jobs:
       SUSFS: ${{ matrix.CONFIG.susfs }}
       ZRAM: ${{ matrix.CONFIG.zram }}
       HOOKS: ${{ matrix.CONFIG.hook_method }}
+      DEBUG:: ${{ matrix.CONFIG.debug }}
     steps:
       - name: 安装配置环境依赖
         run: |
@@ -57,7 +58,32 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             curl bison flex make binutils git perl gcc python3 \
             python-is-python3 bc libssl-dev libelf-dev \
-            bc aria2 zip unzip binutils-aarch64-linux-gnu
+            bc aria2 zip unzip ccache binutils-aarch64-linux-gnu
+
+      - name: 准备 ccache 目录变量
+        run: |
+          CCACHE_DIR="$HOME/.ccache_${{ env.KERNEL_VERSION }}"
+          mkdir -p "$CCACHE_DIR"
+          echo "CCACHE_DIR=$CCACHE_DIR" >> $GITHUB_ENV
+          echo "CCACHE_BASEDIR=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
+
+      - name: 载入当前版本内核的 ccache缓存
+        uses: actions/cache@v4
+        id: ccache-restore
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-esk-${{ env.KERNEL_VERSION }}
+          restore-keys: |
+            ccache-esk-${{ env.KERNEL_VERSION }}-
+            ccache-esk-
+
+      - name: 初始化并配置 ccache
+        run: |
+          ccache --set-config=cache_dir=${{ env.CCACHE_DIR }}
+          ccache --set-config=max_size=5G
+          ccache --set-config=sloppiness=time_macros,include_file_ctime,include_file_mtime,file_stat_matches
+          ccache --set-config=hash_dir=false
+          ccache -s
 
       - name: 初始化源码仓库及llvm-Clang20工具链
         run: |
@@ -426,6 +452,13 @@ jobs:
           pip3 install telethon
           curl -LSOs https://github.com/Tools-cx-app/gki_build_action/raw/main/.github/bot.py
           python3 bot.py
+
+      - name: 上传 Ccache 调试日志
+        if: always() && env.DEBUG
+        uses: actions/upload-artifact@v4
+        with:
+          name: ccache-debug-log
+          path: ${{ github.workspace }}/kernel_workspace/ccache.log
 
       - name: 上传 ZIP 工件
         uses: actions/upload-artifact@v4
