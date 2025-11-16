@@ -46,7 +46,6 @@ jobs:
       SUSFS: ${{ matrix.CONFIG.susfs }}
       ZRAM: ${{ matrix.CONFIG.zram }}
       HOOKS: ${{ matrix.CONFIG.hook_method }}
-      DEBUG: ${{ matrix.CONFIG.debug }}
       OUT: ${{ matrix.CONFIG.out }}
     steps:
       - name: 安装配置环境依赖
@@ -451,13 +450,6 @@ jobs:
           pip3 install telethon
           curl -LSOs https://github.com/Tools-cx-app/gki_build_action/raw/main/.github/bot.py
           python3 bot.py ./kernel_workspace/${{ env.OUT }}
-
-      - name: 上传 Ccache 调试日志
-        if: always() && env.DEBUG
-        uses: actions/upload-artifact@v4
-        with:
-          name: ccache-debug-log
-          path: ${{ github.workspace }}/kernel_workspace/ccache.log
 
       - name: 上传 ZIP 工件
         uses: actions/upload-artifact@v4

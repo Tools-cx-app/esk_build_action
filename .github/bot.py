@@ -3,6 +3,7 @@ import asyncio
 from telethon.sessions import StringSession
 from telethon.tl.types import InputReplyToMessage
 import os
+import sys
 
 API_ID = 611335
 API_HASH = "d524b414d21f4d37f08684c1df41ac9c"
