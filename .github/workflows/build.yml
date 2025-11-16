@@ -175,7 +175,7 @@ jobs:
             patch -p1 < syscall_hooks.patch || true
           fi
           
-          if [[ "${{ env.KRENEL}}" != "ztc(hutao)" ]]; then
+          if [[ "${{ env.KERNEL}}" != "ztc(hutao)" ]]; then
             curl -LSs https://raw.githubusercontent.com/Tools-cx-app/gki_build_action/main/patches/fix_reboot_no_hanlder.patch -o fix_reboot_no_hanlder.patch
             patch -p1 --fuzz=3 < fix_reboot_no_hanlder.patch
           fi
@@ -432,8 +432,8 @@ jobs:
           CHAT_ID: ${{ secrets.CHAT_ID }}
           BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          KERNEL: ${{ env.KRENEL }}
-          KERNELSU: ${{ env.KRENELSU }}
+          KERNEL: ${{ env.KERNEL }}
+          KERNELSU: ${{ env.KERNELSU }}
           REKERNEL: ${{ env.REKERNEL }}
           STOCK_CONFIG: ${{ env.STOCK_CONFIG }}
           LXC: ${{ env.LXC }}
