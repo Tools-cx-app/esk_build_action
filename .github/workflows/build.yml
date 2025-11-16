@@ -434,7 +434,8 @@ jobs:
           CHAT_ID: ${{ secrets.CHAT_ID }}
           BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          KERNEL: ${{ env.KRENEL}}
+          KERNEL: ${{ env.KRENEL }}
+          KERNELSU: ${{ env.KRENELSU }}
           REKERNEL: ${{ env.REKERNEL }}
           STOCK_CONFIG: ${{ env.STOCK_CONFIG }}
           LXC: ${{ env.LXC }}

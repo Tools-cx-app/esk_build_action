@@ -9,6 +9,8 @@ API_HASH = "d524b414d21f4d37f08684c1df41ac9c"
 
 BETTER_NET = os.environ.get("BETTER_NET")
 REKERNEL = os.environ.get("REKERNEL")
+KERNEL = os.environ.get("KERNEL")
+KERNELSU = os.environ.get("RKERNELSU")
 BBG = os.environ.get("BBG")
 LXC = os.environ.get("LXC")
 SUSFS = os.environ.get("SUSFS")
@@ -24,6 +26,7 @@ BOT_CI_SESSION = os.environ.get("BOT_CI_SESSION")
 MSG_TEMPLATE = """
 ```
 kernel source: {kernel}
+root impl: {kernelsu}
 stock config: {stock_config}
 rekernel status: {rekernel}
 lxc support status: {lxc}
@@ -40,6 +43,7 @@ more ZRAM: {zram}
 def get_caption():
     msg = MSG_TEMPLATE.format(
         kernel=KERNEL,
+        kernelsu=KERNELSU,
         stock_config=STOCK_CONFIG,
         rekernel=REKERNEL,
         lxc=LXC,
