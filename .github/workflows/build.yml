@@ -18,6 +18,14 @@ on:
           - 'ztc'
           - 'ztc(hutao)'
           - 'esk'
+      kernelsu:
+        description: "kernelsu分支"
+        required: true
+        type: choice
+        default: 'rksu'
+        options:
+          - 'rksu'
+          - 'sukisu'
       hook_method:
         description: 'hook模式(大部分情况manual即可)'
         required: true
@@ -162,9 +170,17 @@ jobs:
           # 进入内核工作目录
           cd kernel_workspace
           if [[ "${{ github.event.inputs.susfs }}" == "true" ]]; then
-            curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s susfs-main
+            if [[ "${{ github.event.inputs.kernelsu }}" == "rksu" ]]; then
+              curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s susfs-main
+            elif [[ "${{ github.event.inputs.kernelsu }}" == "sukisu" ]]; then
+              curl -LSs "https://github.com/SukiSU-Ultra/SukiSU-Ultra/raw/main/kernel/setup.sh" | bash -s susfs-main
+            fi
           else
-            curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
+            if [[ "${{ github.event.inputs.kernelsu }}" == "rksu" ]]; then
+              curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
+            elif [[ "${{ github.event.inputs.kernelsu }}" == "sukisu" ]]; then
+              curl -LSs "https://github.com/SukiSU-Ultra/SukiSU-Ultra/raw/main/kernel/setup.sh" | bash -s main
+            fi
           fi
 
       - name: 应用 KernelSU & SUSFS 补丁
