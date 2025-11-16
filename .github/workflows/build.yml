@@ -454,5 +454,5 @@ jobs:
       - name: 上传 ZIP 工件
         uses: actions/upload-artifact@v4
         with:
-          name: Kernel_ZIP_Artifacts
+          name: ${{ env.OUT }}
           path: ${{ github.workspace }}/kernel_workspace/*.zip
