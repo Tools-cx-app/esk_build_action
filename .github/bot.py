@@ -61,7 +61,7 @@ async def send_telegram_message():
         print("[+] Sending")
         await client.send_file(
             entity=CHAT_ID,
-            file=["./kernel_workspace/AnyKernel3_RKSU__5.10_A12_localhost-Hutao.zip"],
+            file=["./kernel_workspace/AnyKernel3_5.10_A12_localhost-Hutao.zip"],
             parse_mode="markdown",
             caption=get_caption(),
             reply_to=29147
