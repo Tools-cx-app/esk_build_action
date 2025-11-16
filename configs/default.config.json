@@ -1,0 +1,13 @@
+{
+  "kernel": "esk",
+  "kernelsu": "rksu",
+  "hook_method": "manual",
+  "better_net": "true",
+  "zram": "true",
+  "rekernel_enable": "true",
+  "susfs": "true",
+  "lxc_enable": "false",
+  "stock_config": "false",
+  "baseband_guard": "true",
+  "debug": "false"
+}

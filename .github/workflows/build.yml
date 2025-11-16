@@ -8,82 +8,45 @@ env:
 
 on:
   workflow_dispatch:
-    inputs:
-      kernel:
-        description: "内核源码分支"
-        required: true
-        type: choice
-        default: 'esk'
-        options:
-          - 'ztc'
-          - 'ztc(hutao)'
-          - 'esk'
-      kernelsu:
-        description: "kernelsu分支"
-        required: true
-        type: choice
-        default: 'rksu'
-        options:
-          - 'rksu'
-          - 'sukisu'
-      hook_method:
-        description: 'hook模式(大部分情况manual即可)'
-        required: true
-        type: choice
-        default: 'manual'
-        options:
-          - 'manual'
-          - 'syscall'
-      better_net:
-        description: '是否开启网络功能增强优化配置(优化代理连接,IPV6等功能)'
-        required: true
-        type: choice
-        default: 'true'
-        options:
-          - 'true'
-          - 'false'
-      zram:
-        description: '是否开启lz4等zram压缩算法'
-        required: true
-        type: choice
-        default: 'true'
-        options:
-          - 'true'
-          - 'false'
-      rekernel_enable:
-        description: '是否安装Rekernel'
-        required: true
-        type: boolean
-        default: 'true'
-      susfs:
-        description: '是否开启susfs'
-        required: true
-        type: boolean
-        default: 'true'
-      lxc_enable:
-        description: '是否开启lxc'
-        required: true
-        type: boolean
-        default: 'false'
-      stock_config:
-        description: '是否开启stock config'
-        required: true
-        type: boolean
-        default: 'false'
-      baseband_guard:
-        description: '是否开启内核级基带保护(阻止一切对非用户分区的写入，有效防止格机)'
-        required: true
-        type: boolean
-        default: 'true'
-      ccache_debug:
-        description: '是否上传cache日志'
-        required: true
-        type: boolean
-        default: 'false'
 
 jobs:
+  read:
+    name: Parse *.config.json
+    runs-on: ubuntu-latest
+    outputs:
+      CONFIGS: ${{ steps.generate-matrix.outputs.CONFIGS }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Generate Matrix
+        id: generate-matrix
+        run: |
+          echo "CONFIGS<<EOF" >> $GITHUB_OUTPUT
+          jq -s '[.[]]' configs/*.config.json >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
   build:
     runs-on: ubuntu-latest
+    needs:
+      - read
+    strategy:
+      max-parallel: 4
+      fail-fast: false
+      matrix:
+        CONFIG: ${{ fromJSON(needs.read.outputs.CONFIGS) }}
+    env:
+      KERNEL: ${{ matrix.CONFIG.kernel }}
+      KERNELSU: ${{ matrix.CONFIG.kernelsu }}
+      REKERNEL: ${{ matrix.CONFIG.rekernel_enable }}
+      STOCK_CONFIG: ${{ matrix.CONFIG.stock_config }}
+      LXC: ${{ matrix.CONFIG.lxc_enable }}
+      BBG: ${{ matrix.CONFIG.baseband_guard }}
+      BETTER_NET: ${{ matrix.CONFIG.better_net }}
+      SUSFS: ${{ matrix.CONFIG.susfs }}
+      ZRAM: ${{ matrix.CONFIG.zram }}
+      HOOKS: ${{ matrix.CONFIG.hook_method }}
+      DEBUG:: ${{ matrix.CONFIG.debug }}
     steps:
       - name: 安装配置环境依赖
         run: |
@@ -127,17 +90,17 @@ jobs:
           mkdir -p kernel_workspace
           cd kernel_workspace
           echo "正在克隆源码仓库..."
-          if [[ "${{ github.event.inputs.kernel }}" == "esk" ]]; then
+          if [[ "${{ env.KERNEL }}" == "esk" ]]; then
             aria2c -s16 -x16 -k1M https://github.com/ESK-Project/android12-5.10-gki/archive/refs/heads/main.zip -o common.zip && 
             unzip -q common.zip && 
             mv "android12-5.10-gki-main" common &&
             rm -rf common.zip &
-          elif [[ "${{ github.event.inputs.kernel }}" == "ztc" ]]; then
+          elif [[ "${{ env.KERNEL }}" == "ztc" ]]; then
             aria2c -s16 -x16 -k1M https://github.com/ztc1997/android_gki_kernel_5.10_common/archive/refs/heads/android12-5.10-2025-06.zip -o common.zip && 
             unzip -q common.zip && 
             mv "android_gki_kernel_5.10_common-android12-5.10-2025-06" common &&
             rm -rf common.zip &
-          elif [[ "${{ github.event.inputs.kernel }}" == "ztc(hutao)" ]]; then
+          elif [[ "${{ env.KERNEL }}" == "ztc(hutao)" ]]; then
             aria2c -s16 -x16 -k1M https://github.com/Tools-cx-app/android_gki_kernel_5.10_common/archive/refs/heads/android12-5.10-2025-09.zip -o common.zip && 
             unzip -q common.zip && 
             mv "android_gki_kernel_5.10_common-android12-5.10-2025-09" common &&
@@ -169,16 +132,16 @@ jobs:
         run: |
           # 进入内核工作目录
           cd kernel_workspace
-          if [[ "${{ github.event.inputs.susfs }}" == "true" ]]; then
-            if [[ "${{ github.event.inputs.kernelsu }}" == "rksu" ]]; then
+          if [[ "${{ env.SUSFS }}" == "true" ]]; then
+            if [[ "${{ env.KERNELSU }}" == "rksu" ]]; then
               curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s susfs-main
-            elif [[ "${{ github.event.inputs.kernelsu }}" == "sukisu" ]]; then
+            elif [[ "${{ env.KERNELSU }}" == "sukisu" ]]; then
               curl -LSs "https://github.com/SukiSU-Ultra/SukiSU-Ultra/raw/main/kernel/setup.sh" | bash -s susfs-main
             fi
           else
-            if [[ "${{ github.event.inputs.kernelsu }}" == "rksu" ]]; then
+            if [[ "${{ env.KERNELSU }}" == "rksu" ]]; then
               curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
-            elif [[ "${{ github.event.inputs.kernelsu }}" == "sukisu" ]]; then
+            elif [[ "${{ env.KERNELSU }}" == "sukisu" ]]; then
               curl -LSs "https://github.com/SukiSU-Ultra/SukiSU-Ultra/raw/main/kernel/setup.sh" | bash -s main
             fi
           fi
@@ -188,13 +151,13 @@ jobs:
           cd kernel_workspace
           git clone https://github.com/ShirkNeko/SukiSU_patch.git
           
-          if [[ ${{ github.event.inputs.hook_method }} == "manual" ]]; then
+          if [[ ${{ env.HOOKS }} == "manual" ]]; then
             cp ./SukiSU_patch/hooks/scope_min_manual_hooks_v1.6.patch ./common/
-          elif [[ ${{ github.event.inputs.hook_method }} == "syscall" ]]; then
+          elif [[ ${{ env.HOOKS }} == "syscall" ]]; then
             cp ./SukiSU_patch/hooks/syscall_hooks.patch ./common/
           fi
           
-          if [[ "${{ github.event.inputs.susfs }}" == "true" ]]; then
+          if [[ "${{ env.SUSFS }}" == "true" ]]; then
             git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-${{ env.ANDROID_VERSION }}-${{ env.KERNEL_VERSION }}
             cp ./susfs4ksu/kernel_patches/50_add_susfs_in_gki-android12-5.10.patch ./common/
             cp ./susfs4ksu/kernel_patches/fs/* ./common/fs/
@@ -204,17 +167,17 @@ jobs:
           cp ./SukiSU_patch/69_hide_stuff.patch ./common/
           
           cd ./common
-          if [[ ${{ github.event.inputs.hook_method }} == "manual" ]]; then
+          if [[ ${{ env.HOOKS }} == "manual" ]]; then
             patch -p1 < scope_min_manual_hooks_v1.6.patch || true
-          elif [[ ${{ github.event.inputs.hook_method }} == "syscall" ]]; then
+          elif [[ ${{ env.HOOKS }} == "syscall" ]]; then
             patch -p1 < syscall_hooks.patch || true
           fi
           
-          if [[ "${{ github.event.inputs.susfs }}" == "true" ]]; then
+          if [[ "${{ env.SUSFS }}" == "true" ]]; then
             patch -p1 --fuzz=3 < 50_add_susfs_in_gki-android12-5.10.patch || true
           fi
           
-          if [[ "${{ github.event.inputs.kernel }}" != "ztc(hutao)" ]]; then
+          if [[ "${{ env.KRENEL}}" != "ztc(hutao)" ]]; then
             curl -LSs https://raw.githubusercontent.com/Tools-cx-app/gki_build_action/main/patches/fix_reboot_no_hanlder.patch -o fix_reboot_no_hanlder.patch
             patch -p1 --fuzz=3 < fix_reboot_no_hanlder.patch
           fi
@@ -222,7 +185,7 @@ jobs:
 
       - name: 启用stock config
         run: |
-          if [[ "${{ github.event.inputs.stock_config }}" == "true" ]]; then
+          if [[ "${{ env.STOCK_CONFIG }}" == "true" ]]; then
             cd kernel_workspace/common
             echo "下载相关文件"
             curl -LSs https://raw.githubusercontent.com/Tools-cx-app/gki_build_action/main/patches/stock_config.patch -o stock_config.patch
@@ -231,7 +194,7 @@ jobs:
 
       - name: 添加lz4等zram压缩算法
         run: |
-          if [[ "${{ github.event.inputs.zram }}" == "true" ]]; then
+          if [[ "${{ env.ZRAM }}" == "true" ]]; then
             cd kernel_workspace
             cp -r ./SukiSU_patch/other/zram/lz4k/include/linux/* ./common/include/linux/
             cp -r ./SukiSU_patch/other/zram/lz4k/lib/* ./common/lib/
@@ -250,7 +213,7 @@ jobs:
 
       - name: 添加Re:Kernel
         run: |
-          if [[ "${{ github.event.inputs.rekernel_enable }}" == "true" ]]; then
+          if [[ "${{ env.REKERNEL }}" == "true" ]]; then
             git clone https://github.com/Tools-cx-app/Re-Kernel-5-10.git -b main
             mv Re-Kernel-5-10/LKM-Source kernel_workspace/common/drivers/rekernel
             sed -i 's|#include <android/binder_internal.h>|#include "../../drivers/android/binder_internal.h"|' kernel_workspace/common/drivers/rekernel/rekernel.c
@@ -262,7 +225,7 @@ jobs:
           
       - name: 添加lxc
         run: |
-          if [[ "${{ github.event.inputs.lxc_enable }}" == "true" ]]; then
+          if [[ "${{ env.LXC }}" == "true" ]]; then
             cd kernel_workspace/common
             echo "下载相关文件"
             curl -LSs https://raw.githubusercontent.com/Tools-cx-app/gki_build_action/main/patches/lxc/lxc_support.patch -o lxc.patch
@@ -283,7 +246,7 @@ jobs:
           echo "CONFIG_KSU=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "正在开启manual/syscall钩子..."
           echo "CONFIG_KSU_MANUAL_HOOK=y" >> ./common/arch/arm64/configs/gki_defconfig
-          if [[ "${{ github.event.inputs.susfs }}" == "true" ]]; then
+          if [[ "${{ env.SUSFS }}" == "true" ]]; then
             echo "CONFIG_KSU_SUSFS_SUS_SU=n" >> ./common/arch/arm64/configs/gki_defconfig
             echo "CONFIG_KSU_SUSFS=y" >> ./common/arch/arm64/configs/gki_defconfig
             echo "CONFIG_KSU_SUSFS_HAS_MAGIC_MOUNT=y" >> ./common/arch/arm64/configs/gki_defconfig
@@ -311,7 +274,7 @@ jobs:
       - name: 启用网络功能增强优化配置
         run: |
           cd kernel_workspace
-          if [[ "${{ github.event.inputs.better_net }}" == "true" ]]; then
+          if [[ "${{ env.BETTER_NET }}" == "true" ]]; then
             #启用  BPF 流解析器,实现高性能网络流量处理,增强网络监控和分析能力
             echo "CONFIG_BPF_STREAM_PARSER=y" >> ./common/arch/arm64/configs/gki_defconfig
             #开启增强 Netfilter 防火墙扩展模块,支持基于地址类型的匹配规则,启用 IP 集合支持,提高防火墙规则灵活性,支持更复杂的流量过滤策略
@@ -340,7 +303,7 @@ jobs:
             echo "CONFIG_IP6_NF_NAT=y" >> ./common/arch/arm64/configs/gki_defconfig
             echo "CONFIG_IP6_NF_TARGET_MASQUERADE=y" >> ./common/arch/arm64/configs/gki_defconfig
             #由于部分机型的vintf兼容性检测规则，在开启CONFIG_IP6_NF_NAT后开机会出现"您的设备内部出现了问题。请联系您的设备制造商了解详情。"的提示，故添加一个配置修复补丁，在编译内核时隐藏CONFIG_IP6_NF_NAT=y但不影响对应功能编译
-            if [[ "${{ github.event.inputs.stock_config }}" != "true" ]]; then
+            if [[ "${{ env.STOCK_CONFIG }}" != "true" ]]; then
               cd common
               wget https://github.com/cctv18/oppo_oplus_realme_sm8650/raw/refs/heads/main/other_patch/config.patch
               patch -p1 -F 3 < config.patch || true
@@ -349,7 +312,7 @@ jobs:
 
       - name: 启用内核级基带保护
         run: |
-          if [[ "${{ github.event.inputs.baseband_guard }}" == "true" ]]; then
+          if [[ "${{ env.BBG }}" == "true" ]]; then
             echo "正在启用启用内核级基带保护支持…"
             cd kernel_workspace
             echo "CONFIG_BBG=y" >> ./common/arch/arm64/configs/gki_defconfig
@@ -471,15 +434,15 @@ jobs:
           CHAT_ID: ${{ secrets.CHAT_ID }}
           BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          KERNEL: ${{ github.event.inputs.kernel }}
-          REKERNEL: ${{ github.event.inputs.rekernel_enable }}
-          STOCK_CONFIG: ${{ github.event.inputs.stock_config }}
-          LXC: ${{ github.event.inputs.lxc_enable }}
-          BBG: ${{ github.event.inputs.baseband_guard }}
-          BETTER_NET: ${{ github.event.inputs.better_net }}
-          SUSFS: ${{ github.event.inputs.susfs }}
-          ZRAM: ${{ github.event.inputs.zram }}
-          HOOKS: ${{ github.event.inputs.hook_method }}
+          KERNEL: ${{ env.KRENEL}}
+          REKERNEL: ${{ env.REKERNEL }}
+          STOCK_CONFIG: ${{ env.STOCK_CONFIG }}
+          LXC: ${{ env.LXC }}
+          BBG: ${{ env.BBG }}
+          BETTER_NET: ${{ env.BETTER_NET }}
+          SUSFS: ${{ env.SUSFS }}
+          ZRAM: ${{ env.ZRAM }}
+          HOOKS: ${{ env.HOOKS }}
         run: |
           if [ -z ${{ secrets.BOT_TOKEN }} ]; then
             exit 0
@@ -490,7 +453,7 @@ jobs:
           python3 bot.py
 
       - name: 上传 Ccache 调试日志
-        if: always() && inputs.ccache_debug
+        if: always() && env.DEBUG
         uses: actions/upload-artifact@v4
         with:
           name: ccache-debug-log
