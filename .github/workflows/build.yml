@@ -233,6 +233,9 @@ jobs:
                 /^diff --git/!d
               }'  lxc.patch
               patch -p1 --forward --fuzz=3 < lxc.patch
+              curl -LSs https://raw.githubusercontent.com/Tools-cx-app/gki_build_action/main/patches/lxc-configs.sh -o lxc.sh
+              chmod +x lxc.sh
+              ./lxc.sh arch/arm64/configs/gki_defconfig -w
             fi
           fi
           
