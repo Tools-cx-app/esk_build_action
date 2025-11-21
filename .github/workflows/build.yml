@@ -224,8 +224,8 @@ jobs:
           if [[ "${{ env.LXC }}" == "true" ]]; then
             cd kernel_workspace/common
             echo "下载相关文件"
-            curl -LSs https://raw.githubusercontent.com/Tools-cx-app/gki_build_action/main/patches/lxc/lxc_support.patch -o lxc.patch
-              echo "开始patch"
+            curl -LSs https://raw.githubusercontent.com/Tools-cx-app/gki_build_action/main/patches/lxc.patch -o lxc.patch
+            echo "开始patch"
             if [ -e "drivers/gpu/mediatek/mali-valhall/gpu/arm/midgard/context/mali_kbase_context.c" ]; then
               patch -p1 --forward --fuzz=3 < lxc.patch
             else
