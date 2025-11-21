@@ -1,40 +1,8 @@
-From a2abde3fc85f518300851693f569c5083d3841ba Mon Sep 17 00:00:00 2001
-From: bachnxuan <bachnxuan@gmail.com>
-Date: Tue, 19 Aug 2025 23:17:47 +0700
-Subject: [PATCH] treewide: Add LXC container support
-
-This commit combines the following changes:
-- (halium) GKI: use Android ABI padding for SYSVIPC task_struct fields (ea44ddca343f)
-- GKI: use Android ABI padding for POSIX_MQUEUE user_struct fields (d98f1fd1ae6f)
-- cgroup: fix cgroup prefix (4d843cda92e6)
-- overlayfs: dont make DCACHE_OP_{HASH,COMPARE} weird (fb8d27856804)
-- gki_defconfig: Add LXC configs (e381d6e9f277)
-- Patch mali gpu driver for libhybris (834231b3bfdc)
-
-Signed-off-by: bachnxuan <bachnxuan@gmail.com>
----
- arch/arm64/configs/gki_defconfig              | 18 +++++++++--
- .../arm/midgard/context/mali_kbase_context.c  | 30 +++++++------------
- fs/overlayfs/util.c                           |  4 +--
- include/linux/sched.h                         | 15 ++++++++--
- include/linux/sched/user.h                    |  8 ++++-
- kernel/cgroup/cgroup.c                        |  4 +++
- 6 files changed, 50 insertions(+), 29 deletions(-)
-
 diff --git a/arch/arm64/configs/gki_defconfig b/arch/arm64/configs/gki_defconfig
-index 1cfa7f651e45..ba7d1a519b2f 100644
+index d96be0294..8fe77511a 100644
 --- a/arch/arm64/configs/gki_defconfig
 +++ b/arch/arm64/configs/gki_defconfig
-@@ -3,6 +3,8 @@ CONFIG_LOCALVERSION="-ESK"
- CONFIG_UNAME_OVERRIDE=y
- CONFIG_UNAME_OVERRIDE_TARGET="com.google.android.gms"
- CONFIG_UNAME_OVERRIDE_STRING="5.10.209-android12-9-00019-g4ea09a298bb4-ab12292661"
-+CONFIG_SYSVIPC=y
-+CONFIG_POSIX_MQUEUE=y
- CONFIG_AUDIT=y
- CONFIG_NO_HZ=y
- CONFIG_HIGH_RES_TIMERS=y
-@@ -28,10 +30,15 @@ CONFIG_CGROUP_SCHED=y
+@@ -28,10 +28,15 @@ CONFIG_CGROUP_SCHED=y
  CONFIG_UCLAMP_TASK_GROUP=y
  CONFIG_CGROUP_FREEZER=y
  CONFIG_CPUSETS=y
@@ -51,7 +19,16 @@ index 1cfa7f651e45..ba7d1a519b2f 100644
  CONFIG_RT_SOFTINT_OPTIMIZATION=y
  # CONFIG_RD_BZIP2 is not set
  # CONFIG_RD_LZMA is not set
-@@ -114,7 +121,6 @@ CONFIG_LLVM_POLLY=y
+@@ -40,7 +45,7 @@ CONFIG_RT_SOFTINT_OPTIMIZATION=y
+ CONFIG_BOOT_CONFIG=y
+ CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE_O3=y
+ # CONFIG_SYSFS_SYSCALL is not set
+-# CONFIG_FHANDLE is not set
++CONFIG_FHANDLE=y
+ CONFIG_KALLSYMS_ALL=y
+ CONFIG_BPF_SYSCALL=y
+ CONFIG_BPF_JIT_ALWAYS_ON=y
+@@ -116,7 +121,6 @@ CONFIG_LLVM_POLLY=y
  CONFIG_MODULES=y
  CONFIG_MODULE_UNLOAD=y
  CONFIG_MODVERSIONS=y
@@ -59,7 +36,7 @@ index 1cfa7f651e45..ba7d1a519b2f 100644
  CONFIG_BLK_CGROUP_IOCOST=y
  CONFIG_BLK_INLINE_ENCRYPTION=y
  CONFIG_BLK_INLINE_ENCRYPTION_FALLBACK=y
-@@ -183,6 +189,7 @@ CONFIG_NF_CONNTRACK_PPTP=y
+@@ -185,6 +189,7 @@ CONFIG_NF_CONNTRACK_PPTP=y
  CONFIG_NF_CONNTRACK_SANE=y
  CONFIG_NF_CONNTRACK_TFTP=y
  CONFIG_NF_CT_NETLINK=y
@@ -67,7 +44,7 @@ index 1cfa7f651e45..ba7d1a519b2f 100644
  CONFIG_NETFILTER_XT_TARGET_CLASSIFY=y
  CONFIG_NETFILTER_XT_TARGET_CONNMARK=y
  CONFIG_NETFILTER_XT_TARGET_CONNSECMARK=y
-@@ -197,6 +204,7 @@ CONFIG_NETFILTER_XT_TARGET_TPROXY=y
+@@ -200,6 +205,7 @@ CONFIG_NETFILTER_XT_TARGET_TPROXY=y
  CONFIG_NETFILTER_XT_TARGET_TRACE=y
  CONFIG_NETFILTER_XT_TARGET_SECMARK=y
  CONFIG_NETFILTER_XT_TARGET_TCPMSS=y
@@ -75,7 +52,7 @@ index 1cfa7f651e45..ba7d1a519b2f 100644
  CONFIG_NETFILTER_XT_MATCH_BPF=y
  CONFIG_NETFILTER_XT_MATCH_COMMENT=y
  CONFIG_NETFILTER_XT_MATCH_CONNLIMIT=y
-@@ -245,6 +253,8 @@ CONFIG_IP6_NF_MATCH_RPFILTER=y
+@@ -249,6 +255,8 @@ CONFIG_IP6_NF_MATCH_RPFILTER=y
  CONFIG_IP6_NF_FILTER=y
  CONFIG_IP6_NF_TARGET_REJECT=y
  CONFIG_IP6_NF_MANGLE=y
@@ -84,7 +61,7 @@ index 1cfa7f651e45..ba7d1a519b2f 100644
  CONFIG_IP6_NF_RAW=y
  CONFIG_IP6_NF_TARGET_HL=y
  CONFIG_IP6_NF_MATCH_HL=y
-@@ -300,6 +310,7 @@ CONFIG_BT_HCIUART=y
+@@ -304,6 +312,7 @@ CONFIG_BT_HCIUART=y
  CONFIG_BT_HCIUART_LL=y
  CONFIG_BT_HCIUART_BCM=y
  CONFIG_BT_HCIUART_QCA=y
@@ -92,7 +69,7 @@ index 1cfa7f651e45..ba7d1a519b2f 100644
  CONFIG_RFKILL=y
  CONFIG_NFC=y
  CONFIG_PCI=y
-@@ -311,6 +322,7 @@ CONFIG_PCIE_DW_PLAT_EP=y
+@@ -315,6 +324,7 @@ CONFIG_PCIE_DW_PLAT_EP=y
  CONFIG_PCIE_QCOM=y
  CONFIG_PCIE_KIRIN=y
  CONFIG_PCI_ENDPOINT=y
@@ -100,7 +77,7 @@ index 1cfa7f651e45..ba7d1a519b2f 100644
  CONFIG_FW_LOADER_USER_HELPER=y
  # CONFIG_FW_CACHE is not set
  # CONFIG_SUN50I_DE2_BUS is not set
-@@ -388,7 +400,6 @@ CONFIG_JOYSTICK_XPAD_LEDS=y
+@@ -392,7 +402,6 @@ CONFIG_JOYSTICK_XPAD_LEDS=y
  CONFIG_INPUT_TOUCHSCREEN=y
  CONFIG_INPUT_MISC=y
  CONFIG_INPUT_UINPUT=y
@@ -108,7 +85,7 @@ index 1cfa7f651e45..ba7d1a519b2f 100644
  # CONFIG_LEGACY_PTYS is not set
  CONFIG_SERIAL_8250=y
  # CONFIG_SERIAL_8250_DEPRECATED_OPTIONS is not set
-@@ -404,6 +415,7 @@ CONFIG_SERIAL_SAMSUNG_CONSOLE=y
+@@ -408,6 +417,7 @@ CONFIG_SERIAL_SAMSUNG_CONSOLE=y
  CONFIG_SERIAL_MSM_GENI_EARLY_CONSOLE=y
  CONFIG_SERIAL_SPRD=y
  CONFIG_SERIAL_SPRD_CONSOLE=y
@@ -116,80 +93,105 @@ index 1cfa7f651e45..ba7d1a519b2f 100644
  CONFIG_HVC_DCC=y
  CONFIG_HVC_DCC_SERIALIZE_SMP=y
  CONFIG_SERIAL_DEV_BUS=y
-diff --git a/drivers/gpu/mediatek/mali-valhall/gpu/arm/midgard/context/mali_kbase_context.c b/drivers/gpu/mediatek/mali-valhall/gpu/arm/midgard/context/mali_kbase_context.c
-index a71a08872dd8..dcfebb558651 100644
---- a/drivers/gpu/mediatek/mali-valhall/gpu/arm/midgard/context/mali_kbase_context.c
-+++ b/drivers/gpu/mediatek/mali-valhall/gpu/arm/midgard/context/mali_kbase_context.c
-@@ -132,6 +132,7 @@ int kbase_context_common_init(struct kbase_context *kctx)
- {
- 	const unsigned long cookies_mask = KBASE_COOKIE_MASK;
- 	int err = 0;
-+	struct task_struct *task;
-
- 	/* creating a context is considered a disjoint event */
- 	kbase_disjoint_event(kctx->kbdev);
-@@ -149,30 +150,19 @@ int kbase_context_common_init(struct kbase_context *kctx)
-
- 	/* Check if this is a Userspace created context */
- 	if (likely(kctx->filp)) {
--		struct pid *pid_struct;
-
- 		rcu_read_lock();
--		pid_struct = find_get_pid(kctx->tgid);
--		if (likely(pid_struct)) {
--			struct task_struct *task = pid_task(pid_struct, PIDTYPE_PID);
--
--			if (likely(task)) {
--				/* Take a reference on the task to avoid slow lookup
--				 * later on from the page allocation loop.
--				 */
--				get_task_struct(task);
--				kctx->task = task;
--			} else {
--				dev_err(kctx->kbdev->dev,
--					"Failed to get task pointer for %s/%d",
--					current->comm, current->pid);
--				err = -ESRCH;
--			}
--
--			put_pid(pid_struct);
-+		task = current;
-+
-+		if (likely(task)) {
-+			/* Take a reference on the task to avoid slow lookup
-+			 * later on from the page allocation loop.
-+			 */
-+			get_task_struct(task);
-+			kctx->task = task;
- 		} else {
- 			dev_err(kctx->kbdev->dev,
--				"Failed to get pid pointer for %s/%d",
-+				"Failed to get task pointer for %s/%d",
- 				current->comm, current->pid);
- 			err = -ESRCH;
- 		}
+@@ -734,3 +744,76 @@ CONFIG_TCP_CONG_BBR=y
+ # CONFIG_DEFAULT_CUBIC is not set
+ CONFIG_DEFAULT_BBR=y
+ CONFIG_DEFAULT_TCP_CONG="bbr"
++CONFIG_MULTIUSER=y
++CONFIG_POSIX_MQUEUE=y
++CONFIG_SCHED_AUTOGROUP=y
++CONFIG_DEBUG_BLK_CGROUP=y
++CONFIG_KEYS=y
++CONFIG_NET_CORE=y
++CONFIG_IPV6=y
++CONFIG_NETFILTER_ADVANCED=y
++CONFIG_BRIDGE_NETFILTER=y
++CONFIG_NETFILTER_XTABLES=y
++CONFIG_NETFILTER_XT_MATCH_IPVS=y
++CONFIG_IP_VS=y
++CONFIG_NETFILTER_XT_MARK=y
++CONFIG_NF_NAT=y
++CONFIG_NF_NAT_IPV6=y
++CONFIG_NF_NAT_IPV4=y
++CONFIG_NF_CONNTRACK_IPV4=y
++CONFIG_NF_CONNTRACK_IPV6=y
++CONFIG_NF_NAT_NEEDED=y
++CONFIG_BPF=y
++CONFIG_SECCOMP=y
++CONFIG_SECCOMP_FILTER=y
++CONFIG_CGROUP_PIDS=y
++CONFIG_CGROUP_DEBUG=y
++CONFIG_SWAP=y
++CONFIG_MEMCG_SWAP=y
++CONFIG_MEMCG_SWAP_ENABLED=y
++CONFIG_BLOCK=y
++CONFIG_IOSCHED_CFQ=y
++CONFIG_CFQ_GROUP_IOSCHED=y
++CONFIG_BLK_DEV_THROTTLING=y
++CONFIG_CGROUP_PERF=y
++CONFIG_HUGETLBFS=y
++CONFIG_HUGETLB_PAGE=y
++CONFIG_CGROUP_HUGETLB=y
++CONFIG_NET_CLS_CGROUP=y
++CONFIG_FAIR_GROUP_SCHED=y
++CONFIG_!SCHED_WALT=y
++CONFIG_RT_GROUP_SCHED=y
++CONFIG_IP_VS_NFCT=y
++CONFIG_IP_VS_PROTO_TCP=y
++CONFIG_IP_VS_PROTO_UDP=y
++CONFIG_IP_VS_RR=y
++CONFIG_SECURITY_APPARMOR=y
++CONFIG_EXT3_FS=y
++CONFIG_EXT3_FS_POSIX_ACL=y
++CONFIG_EXT3_FS_SECURITY=y
++CONFIG_VXLAN=y
++CONFIG_BRIDGE_VLAN_FILTERING=y
++CONFIG_VLAN_8021Q=y
++CONFIG_CRYPTO=y
++CONFIG_CRYPTO_AEAD=y
++CONFIG_CRYPTO_GCM=y
++CONFIG_CRYPTO_SEQIV=y
++CONFIG_CRYPTO_GHASH=y
++CONFIG_CHECKPOINT_RESTORE=y
++CONFIG_XFRM=y
++CONFIG_XFRM_ALGO=y
++CONFIG_INET_XFRM_MODE_TRANSPORT=y
++CONFIG_IPVLAN=y
++CONFIG_MACVLAN=y
++CONFIG_NET_L3_MASTER_DEV=y
++CONFIG_NF_NAT_FTP=y
++CONFIG_NF_NAT_TFTP=y
++CONFIG_AUFS_FS=y
++CONFIG_BTRFS_FS=y
++CONFIG_BTRFS_FS_POSIX_ACL=y
++CONFIG_DM_THIN_PROVISIONING=y
++CONFIG_PACKET_DIAG=y
++CONFIG_NETLINK_DIAG=y
++CONFIG_UNIX_DIAG=y
++CONFIG_CFS_BANDWIDTH=y
++# CONFIG_ANDROID_PARANOID_NETWORK is not set
 diff --git a/fs/overlayfs/util.c b/fs/overlayfs/util.c
-index 36116cd1537f..be775f5c4b2e 100644
+index 36116cd15..be775f5c4 100644
 --- a/fs/overlayfs/util.c
 +++ b/fs/overlayfs/util.c
 @@ -143,9 +143,7 @@ bool ovl_dentry_weird(struct dentry *dentry)
  		return true;
-
+ 
  	return dentry->d_flags & (DCACHE_NEED_AUTOMOUNT |
 -				  DCACHE_MANAGE_TRANSIT |
 -				  DCACHE_OP_HASH |
 -				  DCACHE_OP_COMPARE);
 +				  DCACHE_MANAGE_TRANSIT);
  }
-
+ 
  enum ovl_path_type ovl_path_type(struct dentry *dentry)
 diff --git a/include/linux/sched.h b/include/linux/sched.h
-index 97436ce3c4cf..e5042b10cb33 100644
+index 97436ce3c..e5042b10c 100644
 --- a/include/linux/sched.h
 +++ b/include/linux/sched.h
 @@ -971,8 +971,10 @@ struct task_struct {
  	struct nameidata		*nameidata;
-
+ 
  #ifdef CONFIG_SYSVIPC
 -	struct sysv_sem			sysvsem;
 -	struct sysv_shm			sysvshm;
@@ -216,11 +218,11 @@ index 97436ce3c4cf..e5042b10cb33 100644
  	ANDROID_KABI_RESERVE(7);
  	ANDROID_KABI_RESERVE(8);
 +#endif
-
+ 
  	/*
  	 * New fields for task_struct should be added above here, so that
 diff --git a/include/linux/sched/user.h b/include/linux/sched/user.h
-index 6d63a5260130..b96fe706b5ef 100644
+index 6d63a5260..b96fe706b 100644
 --- a/include/linux/sched/user.h
 +++ b/include/linux/sched/user.h
 @@ -23,7 +23,7 @@ struct user_struct {
@@ -235,7 +237,7 @@ index 6d63a5260130..b96fe706b5ef 100644
 @@ -44,9 +44,15 @@ struct user_struct {
  	/* Miscellaneous per-user rate limit */
  	struct ratelimit_state ratelimit;
-
+ 
 +#if defined(CONFIG_POSIX_MQUEUE)
 +	ANDROID_KABI_USE(1, unsigned long mq_bytes);
 +	ANDROID_KABI_RESERVE(2);
@@ -246,13 +248,13 @@ index 6d63a5260130..b96fe706b5ef 100644
  	ANDROID_OEM_DATA_ARRAY(1, 2);
 +#endif
  };
-
+ 
  extern int uids_sysfs_init(void);
 diff --git a/kernel/cgroup/cgroup.c b/kernel/cgroup/cgroup.c
-index 016939a9c6dc..9a1734254a8a 100644
+index c0aa7ccfd..5ae4551e3 100644
 --- a/kernel/cgroup/cgroup.c
 +++ b/kernel/cgroup/cgroup.c
-@@ -4043,6 +4043,10 @@ static int cgroup_add_file(struct cgroup_subsys_state *css, struct cgroup *cgrp,
+@@ -4066,6 +4066,10 @@ static int cgroup_add_file(struct cgroup_subsys_state *css, struct cgroup *cgrp,
  		cfile->kn = kn;
  		spin_unlock_irq(&cgroup_file_kn_lock);
  	}
@@ -260,6 +262,6 @@ index 016939a9c6dc..9a1734254a8a 100644
 +				snprintf(name, CGROUP_FILE_NAME_MAX, "%s.%s", cft->ss->name, cft->name);
 +				kernfs_create_link(cgrp->kn, name, kn);
 +	}
-
+ 
  	return 0;
  }
