@@ -41,6 +41,7 @@ jobs:
       REKERNEL: ${{ matrix.CONFIG.rekernel_enable }}
       STOCK_CONFIG: ${{ matrix.CONFIG.stock_config }}
       LXC: ${{ matrix.CONFIG.lxc_enable }}
+      SSG: ${{ matrix.CONFIG.ssg }}
       BBG: ${{ matrix.CONFIG.baseband_guard }}
       BETTER_NET: ${{ matrix.CONFIG.better_net }}
       SUSFS: ${{ matrix.CONFIG.susfs }}
@@ -205,6 +206,16 @@ jobs:
           if [[ "${{ env.REKERNEL }}" == "true" ]]; then
             echo "CONFIG_REKERNEL=y" >> "kernel_workspace/common/arch/arm64/configs/gki_defconfig"
             echo "CONFIG_REKERNEL_NETWORK=y" >> "kernel_workspace/common/arch/arm64/configs/gki_defconfig"
+          fi
+          
+
+      - name: 添加SSG IO调速器
+        run: |
+          if [[ "${{ env.SSG }}" == "true" ]]; then
+            echo "正在启用三星SSG IO调度器"
+            cd kernel_workspace
+            echo "CONFIG_MQ_IOSCHED_SSG=y" >> ./common/arch/arm64/configs/gki_defconfig
+            echo "CONFIG_MQ_IOSCHED_SSG_CGROUP=y" >> ./common/arch/arm64/configs/gki_defconfig
           fi
           
       - name: 添加lxc
@@ -420,6 +431,7 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           KERNEL: ${{ env.KERNEL }}
           KERNELSU: ${{ env.KERNELSU }}
+          SSG: ${{ env.SSG }}
           REKERNEL: ${{ env.REKERNEL }}
           STOCK_CONFIG: ${{ env.STOCK_CONFIG }}
           LXC: ${{ env.LXC }}

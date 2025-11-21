@@ -18,6 +18,7 @@ SUSFS = os.environ.get("SUSFS")
 HOOKS = os.environ.get("HOOKS")
 KERNEL = os.environ.get("KERNEL")
 ZRAM = os.environ.get("ZRAM")
+SSG = os.environ.get("SSG")
 STOCK_CONFIG = os.environ.get("STOCK_CONFIG")
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
@@ -28,6 +29,7 @@ MSG_TEMPLATE = """
 ```
 kernel source: {kernel}
 root impl: {kernelsu}
+ssg io: {ssg}
 stock config: {stock_config}
 rekernel status: {rekernel}
 lxc support status: {lxc}
@@ -45,6 +47,7 @@ def get_caption():
     msg = MSG_TEMPLATE.format(
         kernel=KERNEL,
         kernelsu=KERNELSU,
+        ssg=SSG,
         stock_config=STOCK_CONFIG,
         rekernel=REKERNEL,
         lxc=LXC,
@@ -56,6 +59,7 @@ def get_caption():
         run_url=RUN_URL,
     )
     return msg
+
 
 async def send_telegram_message(file_path: str):
     async with TelegramClient(StringSession(BOT_CI_SESSION), api_id=API_ID, api_hash=API_HASH) as client:

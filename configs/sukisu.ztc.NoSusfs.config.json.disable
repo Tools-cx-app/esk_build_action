@@ -6,6 +6,7 @@
   "zram": "true",
   "rekernel_enable": "true",
   "susfs": "false",
+  "ssg": "true",
   "lxc_enable": "false",
   "stock_config": "false",
   "baseband_guard": "true",
