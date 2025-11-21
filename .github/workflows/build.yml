@@ -46,7 +46,7 @@ jobs:
       SUSFS: ${{ matrix.CONFIG.susfs }}
       ZRAM: ${{ matrix.CONFIG.zram }}
       HOOKS: ${{ matrix.CONFIG.hook_method }}
-      OUT: ${{ matrix.CONFIG.out }}
+      KEY: ${{ matrix.CONFIG.key }}
     steps:
       - name: 安装配置环境依赖
         run: |
@@ -72,10 +72,10 @@ jobs:
         id: ccache-restore
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ccache-esk-${{ env.KERNEL_VERSION }}
+          key: ccache-esk-${{ env.KERNEL_VERSION }}-${{ env.KEY }}
           restore-keys: |
-            ccache-esk-${{ env.KERNEL_VERSION }}-
-            ccache-esk-
+            ccache-esk-${{ env.KERNEL_VERSION }}-${{ env.KEY }}
+            ccache-esk--
 
       - name: 初始化并配置 ccache
         run: |
@@ -424,7 +424,7 @@ jobs:
             echo "未找到内核镜像文件，构建可能出错"
             exit 1
           fi
-          zip -r ../${{ env.OUT }} ./*
+          zip -r ../${{ env.KEY }}.zip ./*
 
       - name: 上传到 Telegram
         env:
@@ -449,7 +449,7 @@ jobs:
           cd ${{ github.workspace }}
           pip3 install telethon
           curl -LSOs https://github.com/Tools-cx-app/gki_build_action/raw/main/.github/bot.py
-          python3 bot.py ./kernel_workspace/${{ env.OUT }}
+          python3 bot.py ./kernel_workspace/${{ env.KEY }}.zip
 
       - name: 上传 ZIP 工件
         uses: actions/upload-artifact@v4

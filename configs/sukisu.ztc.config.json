@@ -9,5 +9,5 @@
   "lxc_enable": "false",
   "stock_config": "false",
   "baseband_guard": "true",
-  "out": "ak3-5.10_ztc_sukisu_susfs.zip"
+  "key": "ak3-5.10_ztc_sukisu_susfs"
 }
