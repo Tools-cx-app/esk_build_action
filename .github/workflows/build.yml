@@ -440,5 +440,5 @@ jobs:
       - name: 上传 ZIP 工件
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.OUT }}
+          name: ${{ env.KEY }}
           path: ${{ github.workspace }}/kernel_workspace/*.zip
