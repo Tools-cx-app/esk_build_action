@@ -1,7 +1,6 @@
 {
   "kernel": "ztc",
   "kernelsu": "rksu",
-  "hook_method": "manual",
   "better_net": "true",
   "zram": "true",
   "rekernel_enable": "true",

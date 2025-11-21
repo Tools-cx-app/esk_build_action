@@ -46,7 +46,6 @@ jobs:
       BETTER_NET: ${{ matrix.CONFIG.better_net }}
       SUSFS: ${{ matrix.CONFIG.susfs }}
       ZRAM: ${{ matrix.CONFIG.zram }}
-      HOOKS: ${{ matrix.CONFIG.hook_method }}
       KEY: ${{ matrix.CONFIG.key }}
     steps:
       - name: 安装配置环境依赖
@@ -158,10 +157,8 @@ jobs:
             cp ./susfs4ksu/kernel_patches/50_add_susfs_in_gki-android12-5.10.patch ./common/
             cp ./susfs4ksu/kernel_patches/fs/* ./common/fs/
             cp ./susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/
-          elif [[ ${{ env.HOOKS }} == "manual" ]]; then
+          else
             cp ./SukiSU_patch/hooks/scope_min_manual_hooks_v1.6.patch ./common/
-          elif [[ ${{ env.HOOKS }} == "syscall" ]]; then
-            cp ./SukiSU_patch/hooks/syscall_hooks.patch ./common/
           fi
           
 
@@ -171,10 +168,8 @@ jobs:
           
           if [[ "${{ env.SUSFS }}" == "true" ]]; then
             patch -p1 --fuzz=3 < 50_add_susfs_in_gki-android12-5.10.patch || true
-          elif [[ ${{ env.HOOKS }} == "manual" ]]; then
+          else
             patch -p1 < scope_min_manual_hooks_v1.6.patch || true
-          elif [[ ${{ env.HOOKS }} == "syscall" ]]; then
-            patch -p1 < syscall_hooks.patch || true
           fi
           
           patch -p1 69_hide_stuff.patch || true
@@ -248,7 +243,7 @@ jobs:
             exit
           fi
           echo "CONFIG_KSU=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "正在开启manual/syscall钩子..."
+          echo "正在开启manual钩子..."
           echo "CONFIG_KSU_MANUAL_HOOK=y" >> ./common/arch/arm64/configs/gki_defconfig
           if [[ "${{ env.SUSFS }}" == "true" ]]; then
             echo "CONFIG_KSU_SUSFS_SUS_SU=n" >> ./common/arch/arm64/configs/gki_defconfig
@@ -448,7 +443,6 @@ jobs:
           BETTER_NET: ${{ env.BETTER_NET }}
           SUSFS: ${{ env.SUSFS }}
           ZRAM: ${{ env.ZRAM }}
-          HOOKS: ${{ env.HOOKS }}
         run: |
           if [ -z ${{ secrets.BOT_TOKEN }} ]; then
             exit 0

@@ -1,7 +1,6 @@
 {
   "kernel": "esk",
   "kernelsu": "sukisu",
-  "hook_method": "manual",
   "better_net": "true",
   "zram": "true",
   "rekernel_enable": "true",

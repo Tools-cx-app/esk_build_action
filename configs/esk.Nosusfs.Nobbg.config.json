@@ -1,7 +1,6 @@
 {
   "kernel": "esk",
   "kernelsu": "disable",
-  "hook_method": "manual",
   "better_net": "false",
   "zram": "false",
   "rekernel_enable": "true",

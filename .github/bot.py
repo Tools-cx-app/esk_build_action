@@ -15,7 +15,6 @@ KERNELSU = os.environ.get("KERNELSU")
 BBG = os.environ.get("BBG")
 LXC = os.environ.get("LXC")
 SUSFS = os.environ.get("SUSFS")
-HOOKS = os.environ.get("HOOKS")
 KERNEL = os.environ.get("KERNEL")
 ZRAM = os.environ.get("ZRAM")
 SSG = os.environ.get("SSG")
@@ -36,7 +35,6 @@ lxc support status: {lxc}
 BBG: {bbg}
 better_net status: {better_net}
 susfs status: {susfs}
-hook type: {hooks}
 more ZRAM: {zram}
 ```
 [Workflow run]({run_url})
@@ -54,7 +52,6 @@ def get_caption():
         bbg=BBG,
         better_net=BETTER_NET,
         susfs=SUSFS,
-        hooks=HOOKS,
         zram=ZRAM,
         run_url=RUN_URL,
     )
